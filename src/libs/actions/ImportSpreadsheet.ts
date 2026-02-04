@@ -2,6 +2,7 @@ import Onyx from 'react-native-onyx';
 import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
 import type {ImportTransactionSettings} from '@src/types/onyx/ImportedSpreadsheet';
+import type {SavedCSVColumnLayoutData} from '@src/types/onyx/SavedCSVColumnLayout';
 
 function setSpreadsheetData(
     data: string[][],
@@ -103,4 +104,46 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
     });
 }
 
-export {setSpreadsheetData, setColumnName, closeImportPage, setContainsHeader, setImportTransactionCardName, setImportTransactionCurrency, setImportTransactionSettings};
+/**
+ * Applies saved column mappings to the spreadsheet data if the column headers match.
+ * This is used when importing transactions to an existing card that has a saved layout.
+ *
+ * @param spreadsheetData - The spreadsheet data in column-major format
+ * @param savedLayout - The saved column layout for this card
+ * @returns Promise that resolves when column mappings are applied
+ */
+function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
+    const savedNames = savedLayout.columnMapping?.names;
+    if (!savedNames) {
+        return Promise.resolve();
+    }
+
+    // Build a map of column header names to column indexes (trimmed for comparison)
+    const headerToIndex: Record<string, number> = {};
+    spreadsheetData.forEach((column, index) => {
+        const headerName = column[0]?.trim();
+        if (headerName) {
+            headerToIndex[headerName] = index;
+        }
+    });
+
+    // For each saved role -> column name mapping, find the matching column index
+    const columnUpdates: Record<number, string> = {};
+    const roles = ['date', 'merchant', 'amount', 'category'] as const;
+
+    for (const role of roles) {
+        const savedColumnName = savedNames[role]?.trim();
+        if (savedColumnName && headerToIndex[savedColumnName] !== undefined) {
+            columnUpdates[headerToIndex[savedColumnName]] = role;
+        }
+    }
+
+    // If we found any matching columns, apply the mappings
+    if (Object.keys(columnUpdates).length > 0) {
+        return Onyx.merge(ONYXKEYS.IMPORTED_SPREADSHEET, {columns: columnUpdates});
+    }
+
+    return Promise.resolve();
+}
+
+export {setSpreadsheetData, setColumnName, closeImportPage, setContainsHeader, setImportTransactionCardName, setImportTransactionCurrency, setImportTransactionSettings, applySavedColumnMappings};

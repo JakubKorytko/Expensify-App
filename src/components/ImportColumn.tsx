@@ -1,5 +1,5 @@
 import {Str} from 'expensify-common';
-import React, {useEffect} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {View} from 'react-native';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
@@ -166,15 +166,35 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
 
     const columnValuesString = column.slice(containsHeader ? 1 : 0).join(', ');
 
-    const colName = findColumnName(column.at(0) ?? '');
-    const defaultSelectedIndex = columnRoles?.findIndex((item) => item.value === colName);
-    const finalIndex = defaultSelectedIndex !== -1 ? defaultSelectedIndex : 0;
+    // Get the currently selected value from Onyx (may have been set by saved column mappings)
+    const currentColumnValue = spreadsheet?.columns?.[columnIndex];
+
+    // Auto-detect column name from header
+    const autoDetectedColName = findColumnName(column.at(0) ?? '');
+    const autoDetectedIndex = columnRoles?.findIndex((item) => item.value === autoDetectedColName) ?? -1;
+
+    // Calculate the selected index based on Onyx state (priority) or auto-detected value
+    const selectedIndex = useMemo(() => {
+        // If there's a value in Onyx, use that
+        if (currentColumnValue) {
+            const onyxIndex = columnRoles?.findIndex((item) => item.value === currentColumnValue) ?? -1;
+            if (onyxIndex !== -1) {
+                return onyxIndex;
+            }
+        }
+        // Otherwise use auto-detected value, or default to 0 (IGNORE)
+        return autoDetectedIndex !== -1 ? autoDetectedIndex : 0;
+    }, [currentColumnValue, columnRoles, autoDetectedIndex]);
 
     useEffect(() => {
-        if (defaultSelectedIndex === -1) {
+        // Don't auto-detect if column already has a value (e.g., from saved mappings)
+        if (currentColumnValue) {
             return;
         }
-        setColumnName(columnIndex, colName);
+        if (autoDetectedIndex === -1) {
+            return;
+        }
+        setColumnName(columnIndex, autoDetectedColName);
         // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want this effect to run again
     }, []);
 
@@ -208,7 +228,7 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
                             onOptionSelected={(option) => {
                                 setColumnName(columnIndex, option.value);
                             }}
-                            defaultSelectedIndex={finalIndex}
+                            defaultSelectedIndex={selectedIndex}
                             options={options}
                             success={false}
                         />

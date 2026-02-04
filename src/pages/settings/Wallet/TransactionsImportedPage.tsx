@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import HeaderWithBackButton from '@components/HeaderWithBackButton';
 import type {ColumnRole} from '@components/ImportColumn';
 import ImportSpreadsheetColumns from '@components/ImportSpreadsheetColumns';
@@ -7,6 +7,7 @@ import ScreenWrapper from '@components/ScreenWrapper';
 import useCloseImportPage from '@hooks/useCloseImportPage';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
+import {applySavedColumnMappings} from '@libs/actions/ImportSpreadsheet';
 import importTransactionsFromCSV from '@libs/actions/ImportTransactions';
 import {findDuplicate, generateColumnNames} from '@libs/importSpreadsheetUtils';
 import Navigation from '@libs/Navigation/Navigation';
@@ -26,12 +27,36 @@ function TransactionsImportedPage({route}: TransactionsImportedPageProps) {
     const {cardID: existingCardID} = route.params ?? {};
     const {translate} = useLocalize();
     const [spreadsheet, spreadsheetMetadata] = useOnyx(ONYXKEYS.IMPORTED_SPREADSHEET, {canBeMissing: true});
+    const [savedColumnLayouts] = useOnyx(ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST, {canBeMissing: true});
     const [isImporting, setIsImporting] = useState(false);
     const [isValidationEnabled, setIsValidationEnabled] = useState(false);
+    const hasAppliedSavedMappings = useRef(false);
 
     const {setIsClosing} = useCloseImportPage();
 
     const columnNames = generateColumnNames(spreadsheet?.data?.length ?? 0);
+
+    // Apply saved column mappings when importing to an existing card
+    useEffect(() => {
+        if (hasAppliedSavedMappings.current) {
+            return;
+        }
+
+        if (!existingCardID || !spreadsheet?.data || !savedColumnLayouts) {
+            return;
+        }
+
+        // Ensure cardID is a string for lookup (route params are strings)
+        const cardIDKey = String(existingCardID);
+        const savedLayout = savedColumnLayouts[cardIDKey];
+
+        if (!savedLayout) {
+            return;
+        }
+
+        hasAppliedSavedMappings.current = true;
+        applySavedColumnMappings(spreadsheet.data, savedLayout);
+    }, [existingCardID, spreadsheet?.data, savedColumnLayouts]);
 
     const columnRoles: ColumnRole[] = useMemo(
         () => [
