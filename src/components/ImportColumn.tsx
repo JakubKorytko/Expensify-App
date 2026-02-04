@@ -1,5 +1,5 @@
 import {Str} from 'expensify-common';
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect} from 'react';
 import {View} from 'react-native';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
@@ -166,32 +166,17 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
 
     const columnValuesString = column.slice(containsHeader ? 1 : 0).join(', ');
 
-    // Get the currently selected value from Onyx (may have been set by saved column mappings)
+    // Current value from Onyx (may be set by saved column mappings)
     const currentColumnValue = spreadsheet?.columns?.[columnIndex];
-
-    // Auto-detect column name from header
     const autoDetectedColName = findColumnName(column.at(0) ?? '');
-    const autoDetectedIndex = columnRoles?.findIndex((item) => item.value === autoDetectedColName) ?? -1;
 
-    // Calculate the selected index based on Onyx state (priority) or auto-detected value
-    const selectedIndex = useMemo(() => {
-        // If there's a value in Onyx, use that
-        if (currentColumnValue) {
-            const onyxIndex = columnRoles?.findIndex((item) => item.value === currentColumnValue) ?? -1;
-            if (onyxIndex !== -1) {
-                return onyxIndex;
-            }
-        }
-        // Otherwise use auto-detected value, or default to 0 (IGNORE)
-        return autoDetectedIndex !== -1 ? autoDetectedIndex : 0;
-    }, [currentColumnValue, columnRoles, autoDetectedIndex]);
+    // Selected index: prefer Onyx value, fall back to auto-detected, default to 0
+    const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue || autoDetectedColName)) ?? -1;
+    const selectedIndex = foundIndex !== -1 ? foundIndex : 0;
 
     useEffect(() => {
-        // Don't auto-detect if column already has a value (e.g., from saved mappings)
-        if (currentColumnValue) {
-            return;
-        }
-        if (autoDetectedIndex === -1) {
+        // Auto-detect column name on mount, but only if no value is already set
+        if (currentColumnValue || !autoDetectedColName) {
             return;
         }
         setColumnName(columnIndex, autoDetectedColName);
