@@ -104,13 +104,6 @@ type ColumnIndexes = {
     category: number;
 };
 
-type ColumnMappings = {
-    date?: string;
-    merchant?: string;
-    amount?: string;
-    category?: string;
-};
-
 /**
  * Extracts the column indexes for each transaction attribute from the spreadsheet column mapping
  */
@@ -134,30 +127,87 @@ function getColumnIndexes(columns: Record<number, string> | undefined): ColumnIn
     return indexes;
 }
 
+type ColumnLayoutIndexes = {
+    date?: string;
+    merchant?: string;
+    amount?: string;
+    category?: string;
+    ignore?: string;
+    type?: boolean;
+};
+
+type ColumnLayoutNames = {
+    date?: string;
+    merchant?: string;
+    amount?: string;
+    category?: string;
+    ignore?: string;
+    type?: boolean;
+};
+
+type ColumnLayout = {
+    accountDetails: {
+        accountID: string;
+        bank: string;
+        currency: string;
+        reimbursable: boolean;
+    };
+    columnMapping: {
+        indexes: ColumnLayoutIndexes;
+        names: ColumnLayoutNames;
+        flipAmountSign: boolean;
+        name: string;
+        offset: number;
+        reimbursable: boolean;
+        useTypeColumn: boolean;
+    };
+};
+
 /**
- * Builds a mapping of transaction attributes to their column header names from the spreadsheet
+ * Builds the full column layout structure for oldDot compatibility
  */
-function buildColumnMappings(spreadsheet: ImportedSpreadsheet): ColumnMappings {
+function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, currency: string, isReimbursable: boolean, flipAmountSign: boolean): ColumnLayout {
     const {data, columns, containsHeader = true} = spreadsheet;
-    const columnMappings: ColumnMappings = {};
-
-    if (!containsHeader || !data || data.length === 0 || !columns) {
-        return columnMappings;
-    }
-
     const columnIndexes = getColumnIndexes(columns);
 
-    // For each attribute, get the header name from the first row of data
-    for (const [role, index] of Object.entries(columnIndexes)) {
-        if (index >= 0 && index < data.length) {
-            const headerName = data[index]?.[0];
-            if (headerName) {
-                columnMappings[role as keyof ColumnMappings] = headerName;
+    // Build indexes object (values as strings for oldDot compatibility)
+    const indexes: ColumnLayoutIndexes = {type: false};
+    const names: ColumnLayoutNames = {type: false};
+
+    if (columns) {
+        for (const [indexStr, role] of Object.entries(columns)) {
+            if (role === 'date' || role === 'merchant' || role === 'amount' || role === 'category') {
+                indexes[role] = indexStr;
+
+                // Get the header name for this column
+                const colIndex = Number(indexStr);
+                if (containsHeader && data && colIndex >= 0 && colIndex < data.length) {
+                    const headerName = data[colIndex]?.[0];
+                    if (headerName) {
+                        names[role] = headerName;
+                    }
+                }
             }
         }
     }
 
-    return columnMappings;
+    return {
+        accountDetails: {
+            accountID: cardName,
+            bank: 'upload',
+            currency,
+            reimbursable: isReimbursable,
+        },
+        columnMapping: {
+            indexes,
+            names,
+            flipAmountSign,
+            name: 'Default',
+            offset: containsHeader ? 1 : 0,
+            reimbursable: isReimbursable,
+            useTypeColumn: false,
+        },
+    };
 }
 
 /**
@@ -281,7 +331,7 @@ function buildOptimisticTransactions(transactionList: TransactionFromCSV[], card
  */
 function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCardID?: number) {
     const settings = spreadsheet.importTransactionSettings ?? {};
-    const {cardDisplayName = 'Imported Card', currency = CONST.CURRENCY.USD, isReimbursable = true} = settings;
+    const {cardDisplayName = 'Imported Card', currency = CONST.CURRENCY.USD, isReimbursable = true, flipAmountSign = false} = settings;
 
     // Build transaction list from spreadsheet
     const transactionList = buildTransactionListFromSpreadsheet(spreadsheet, settings);
@@ -314,8 +364,8 @@ function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCar
     // Create optimistic transactions
     const optimisticTransactions = buildOptimisticTransactions(transactionList, cardID, currency, isReimbursable);
 
-    // Build column mappings from the spreadsheet data
-    const columnMappings = buildColumnMappings(spreadsheet);
+    // Build full column layout for oldDot compatibility
+    const columnLayout = buildColumnLayout(spreadsheet, cardDisplayName, currency, isReimbursable, flipAmountSign);
 
     const params: ImportCSVTransactionsParams = {
         transactionList: JSON.stringify(transactionList),
@@ -323,7 +373,7 @@ function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCar
         cardName: cardDisplayName,
         currency,
         reimbursable: isReimbursable,
-        columnMappings: JSON.stringify(columnMappings),
+        columnMappings: JSON.stringify(columnLayout),
     };
 
     const optimisticData = [] as OnyxUpdate[];
@@ -354,7 +404,7 @@ function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCar
         });
     }
 
-    // Optimistically save the column mappings for this card (replaces entire entry)
+    // Optimistically save the column layout for this card (replaces entire entry)
     // First clear any existing entry, then set the new one to match backend behavior
     optimisticData.push({
         onyxMethod: Onyx.METHOD.MERGE,
@@ -364,14 +414,7 @@ function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCar
     optimisticData.push({
         onyxMethod: Onyx.METHOD.MERGE,
         key: ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST,
-        value: {
-            [cardID]: {
-                name: cardDisplayName,
-                columnMapping: {
-                    names: columnMappings,
-                },
-            },
-        },
+        value: {[cardID]: columnLayout},
     });
 
     optimisticData.push({
