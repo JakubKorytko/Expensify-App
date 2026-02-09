@@ -128,38 +128,39 @@ function getColumnIndexes(columns: Record<number, string> | undefined): ColumnIn
 }
 
 type ColumnLayoutIndexes = {
-    date?: string;
-    merchant?: string;
-    amount?: string;
-    category?: string;
-    ignore?: string;
-    type?: boolean;
+    date?: number | boolean;
+    merchant?: number | boolean;
+    amount?: number | boolean;
+    category?: number | boolean;
+    ignore?: number | boolean;
+    type?: number | boolean;
 };
 
 type ColumnLayoutNames = {
-    date?: string;
-    merchant?: string;
-    amount?: string;
-    category?: string;
-    ignore?: string;
-    type?: boolean;
+    date?: string | boolean;
+    merchant?: string | boolean;
+    amount?: string | boolean;
+    category?: string | boolean;
+    ignore?: string | boolean;
+    type?: string | boolean;
 };
 
 type ColumnLayout = {
+    name: string;
+    useTypeColumn: boolean;
+    flipAmountSign: boolean;
+    reimbursable: boolean;
+    offset: number;
+    dateFormat?: string | null;
     accountDetails: {
-        accountID: string;
         bank: string;
         currency: string;
-        reimbursable: boolean;
+        accountID: string;
+        reimbursable?: boolean;
     };
     columnMapping: {
-        indexes: ColumnLayoutIndexes;
         names: ColumnLayoutNames;
-        flipAmountSign: boolean;
-        name: string;
-        offset: number;
-        reimbursable: boolean;
-        useTypeColumn: boolean;
+        indexes: ColumnLayoutIndexes;
     };
 };
 
@@ -168,19 +169,31 @@ type ColumnLayout = {
  */
 function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, currency: string, isReimbursable: boolean, flipAmountSign: boolean): ColumnLayout {
     const {data, columns, containsHeader = true} = spreadsheet;
-    const columnIndexes = getColumnIndexes(columns);
 
-    // Build indexes object (values as strings for oldDot compatibility)
-    const indexes: ColumnLayoutIndexes = {type: false};
-    const names: ColumnLayoutNames = {type: false};
+    // Build indexes and names objects (use false for unmapped columns per oldDot convention)
+    const indexes: ColumnLayoutIndexes = {
+        date: false,
+        amount: false,
+        merchant: false,
+        category: false,
+        type: false,
+    };
+    const names: ColumnLayoutNames = {
+        date: false,
+        amount: false,
+        merchant: false,
+        category: false,
+        type: false,
+    };
 
     if (columns) {
         for (const [indexStr, role] of Object.entries(columns)) {
             if (role === 'date' || role === 'merchant' || role === 'amount' || role === 'category') {
-                indexes[role] = indexStr;
+                const colIndex = Number(indexStr);
+                // OldDot expects indexes as numbers, not strings
+                indexes[role] = colIndex;
 
                 // Get the header name for this column
-                const colIndex = Number(indexStr);
                 if (containsHeader && data && colIndex >= 0 && colIndex < data.length) {
                     const headerName = data[colIndex]?.[0];
                     if (headerName) {
@@ -192,20 +205,22 @@ function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, c
     }
 
     return {
+        name: 'Default',
+        useTypeColumn: false,
+        flipAmountSign,
+        reimbursable: isReimbursable,
+        // In oldDot, offset is the row index of the header row (0 = header at row 0)
+        // not the number of rows to skip
+        offset: 0,
+        dateFormat: null,
         accountDetails: {
-            accountID: cardName,
             bank: 'upload',
             currency,
-            reimbursable: isReimbursable,
+            accountID: cardName,
         },
         columnMapping: {
-            indexes,
             names,
-            flipAmountSign,
-            name: 'Default',
-            offset: containsHeader ? 1 : 0,
-            reimbursable: isReimbursable,
-            useTypeColumn: false,
+            indexes,
         },
     };
 }

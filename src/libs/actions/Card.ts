@@ -1045,8 +1045,8 @@ function deletePersonalCard({cardID, card, allTransactions, allReports}: DeleteP
         }
     }
 
-    // Optimistically remove the card immediately for instant UI feedback
-    const optimisticData: Array<OnyxUpdate<typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.COLLECTION.TRANSACTION>> = [
+    // Optimistically remove the card and its saved column layout immediately for instant UI feedback
+    const optimisticData: OnyxUpdate[] = [
         {
             onyxMethod: Onyx.METHOD.MERGE,
             key: ONYXKEYS.CARD_LIST,
@@ -1054,9 +1054,16 @@ function deletePersonalCard({cardID, card, allTransactions, allReports}: DeleteP
                 [cardID]: null,
             },
         },
+        {
+            onyxMethod: Onyx.METHOD.MERGE,
+            key: ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST,
+            value: {
+                [cardID]: null,
+            },
+        },
     ];
 
-    const failureData: Array<OnyxUpdate<typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.COLLECTION.TRANSACTION>> = [
+    const failureData: OnyxUpdate[] = [
         {
             onyxMethod: Onyx.METHOD.MERGE,
             key: ONYXKEYS.CARD_LIST,

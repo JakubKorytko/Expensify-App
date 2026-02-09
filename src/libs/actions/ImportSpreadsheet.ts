@@ -132,9 +132,14 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
     const roles = ['date', 'merchant', 'amount', 'category'] as const;
 
     for (const role of roles) {
-        const savedColumnName = savedNames[role]?.trim();
-        if (savedColumnName && headerToIndex[savedColumnName] !== undefined) {
-            columnUpdates[headerToIndex[savedColumnName]] = role;
+        const savedColumnName = savedNames[role];
+        // Skip if the value is false (not mapped) or not a string
+        if (typeof savedColumnName !== 'string') {
+            continue;
+        }
+        const trimmedName = savedColumnName.trim();
+        if (trimmedName && headerToIndex[trimmedName] !== undefined) {
+            columnUpdates[headerToIndex[trimmedName]] = role;
         }
     }
 
