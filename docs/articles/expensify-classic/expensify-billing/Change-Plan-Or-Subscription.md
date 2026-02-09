@@ -9,27 +9,6 @@ Expensify offers several plans based on your needs: **Track, Submit, Collect, Co
 
 ---
 
-# Change a Subscription on an Individual Plan
-
-**Web:**
-1. Go to **Settings > Workspaces > Individual > [Workspace Name]**.
-2. Click **Overview** and select **Switch** under your desired plan.
-
-**Mobile:**
-1. Open the Expensify app.
-2. Tap the **hamburger menu** (three lines) on the top left.
-3. Tap **Settings**.
-4. Tap **View All** under your Workspace.
-5. Select the Workspace under the **Individual** tab.
-6. Tap **Current Plan**.
-7. Tap **Switch** to change plans.
-
-## Upgrade to a Group Workspace
-1. Go to **Settings > Workspaces > Group**.
-2. Select a **Collect** or **Control** plan.
-
----
-
 # Changing a Subscription on a Group Plan
 
 **Web:**
@@ -58,22 +37,6 @@ Expensify offers several plans based on your needs: **Track, Submit, Collect, Co
 1. Go to **Settings > Workspaces > Group > Subscription**.
 2. Toggle **Auto-renew** off before your current subscription ends if you do not want it to renew.
    - If **Auto-renew** is disabled, your final bill at the annual rate will be issued on the date listed under **Subscriptions**.
-
----
-
-# Downgrading to a Free Account from an Individual Plan
-
-**Web:**
-1. Log in via a web browser.
-2. Go to **Settings > Workspaces > Individual > Subscription**.
-3. Click **Cancel Subscription**.
-   - **Note**: The subscription is prepaid for 30 days of unlimited **SmartScanning**. No refunds are issued, but you retain access until the period ends.
-
-**App Store (iOS Users):**
-1. Go to the **App Store**.
-2. Tap your **Apple ID** > **Subscriptions**.
-3. Cancel your Expensify subscription.
-   - **Note**: This cannot be done within Expensify. Downgrading to a free account must happen from the App Store. 
 
 ---
 
@@ -106,4 +69,3 @@ Yes, monthly subscriptions are prepaid and not usage-based, so you will be charg
 ## I'm in a Group Workspace. Do I need the monthly subscription too?
 
 No, Group Workspace members already have unlimited **SmartScans**. However, you can keep a subscription for personal use if you leave your company's Workspace.
-
