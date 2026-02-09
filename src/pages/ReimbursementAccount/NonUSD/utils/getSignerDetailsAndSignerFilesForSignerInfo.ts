@@ -45,6 +45,14 @@ function getSignerDetailsAndSignerFilesForSignerInfo(reimbursementAccountDraft: 
             continue;
         }
 
+        // Preserve type for DOWNLOADED_PDS_AND_FSG since they are boolean values
+        if (fieldName === DOWNLOADED_PDS_AND_FSG) {
+            if (reimbursementAccountDraft?.[fieldName]) {
+                signerDetails[fieldName] = reimbursementAccountDraft[fieldName];
+            }
+            continue;
+        }
+
         // Always include required fields (with empty string if not present) so Auth validation can catch them
         // For non-required fields, only include if they have a value
         if (requiredSignerFields.has(fieldName) || reimbursementAccountDraft?.[fieldName]) {
