@@ -1,12 +1,7 @@
-import * as API from '@libs/API';
-import type {SendPerformanceTimingParams} from '@libs/API/parameters';
-import {READ_COMMANDS} from '@libs/API/types';
 import * as Environment from '@libs/Environment/Environment';
 import getEnvironment from '@libs/Environment/getEnvironment';
 import Firebase from '@libs/Firebase';
-import getPlatform from '@libs/getPlatform';
 import Log from '@libs/Log';
-import pkg from '../../../package.json';
 
 type TimestampData = {
     startTime: number;
@@ -30,10 +25,10 @@ function start(eventName: string, shouldUseFirebase = true) {
 }
 
 /**
- * End performance timing. Measure the time between event start/end in milliseconds, and push to Grafana
+ * End performance timing. Measure the time between event start/end in milliseconds, and push to Firebase
  *
  * @param eventName - event name used as timestamp key
- * @param [secondaryName] - optional secondary event name, passed to grafana
+ * @param [secondaryName] - optional secondary event name
  * @param [maxExecutionTime] - optional amount of time (ms) to wait before logging a warn
  */
 function end(eventName: string, secondaryName = '', maxExecutionTime = 0) {
@@ -51,28 +46,18 @@ function end(eventName: string, secondaryName = '', maxExecutionTime = 0) {
 
     getEnvironment().then((envName) => {
         const baseEventName = `${envName}.new.expensify.${eventName}`;
-        const grafanaEventName = secondaryName ? `${baseEventName}.${secondaryName}` : baseEventName;
+        const eventNameWithSecondary = secondaryName ? `${baseEventName}.${secondaryName}` : baseEventName;
 
-        console.debug(`Timing:${grafanaEventName}`, eventTime);
+        console.debug(`Timing:${eventNameWithSecondary}`, eventTime);
         delete timestampData[eventName];
 
         if (Environment.isDevelopment()) {
-            // Don't create traces on dev as this will mess up the accuracy of data in release builds of the app
             return;
         }
 
         if (maxExecutionTime && eventTime > maxExecutionTime) {
             Log.warn(`${eventName} exceeded max execution time of ${maxExecutionTime}.`, {eventTime, eventName});
         }
-
-        const parameters: SendPerformanceTimingParams = {
-            name: grafanaEventName,
-            value: eventTime,
-            platform: `${getPlatform()}`,
-            version: `${pkg.version}`,
-        };
-
-        API.read(READ_COMMANDS.SEND_PERFORMANCE_TIMING, parameters, {});
     });
 }
 
