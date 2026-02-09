@@ -2,7 +2,7 @@ import React from 'react';
 import useDecisionModal from '@hooks/useDecisionModal';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
-import {setIsUsingImportedState, setPreservedUserSession} from '@libs/actions/App';
+import {setIsUsingImportedState, setPreservedAccount, setPreservedUserSession} from '@libs/actions/App';
 import {setShouldForceOffline} from '@libs/actions/Network';
 import {rollbackOngoingRequest} from '@libs/actions/PersistedRequests';
 import {cleanAndTransformState, importState} from '@libs/ImportOnyxStateUtils';
@@ -16,6 +16,7 @@ import type ImportOnyxStateProps from './types';
 
 export default function ImportOnyxState({setIsLoading}: ImportOnyxStateProps) {
     const [session] = useOnyx(ONYXKEYS.SESSION, {canBeMissing: false});
+    const [account] = useOnyx(ONYXKEYS.ACCOUNT, {canBeMissing: true});
     const {showDecisionModal} = useDecisionModal();
     const {translate} = useLocalize();
 
@@ -39,13 +40,19 @@ export default function ImportOnyxState({setIsLoading}: ImportOnyxStateProps) {
 
                 const currentUserSessionCopy = {...session};
                 setPreservedUserSession(currentUserSessionCopy);
+
+                if (account) {
+                    const currentAccountCopy = {...account};
+                    setPreservedAccount(currentAccountCopy);
+                }
+
                 setShouldForceOffline(true);
 
                 return importState(transformedState);
             })
             .then(() => {
                 setIsUsingImportedState(true);
-                Navigation.navigate(ROUTES.INBOX);
+                Navigation.navigate(ROUTES.HOME);
             })
             .catch((error) => {
                 console.error('Error importing state:', error);

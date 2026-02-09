@@ -80,6 +80,7 @@ import LoadingBar from './LoadingBar';
 import type {MoneyRequestHeaderStatusBarProps} from './MoneyRequestHeaderStatusBar';
 import MoneyRequestHeaderStatusBar from './MoneyRequestHeaderStatusBar';
 import MoneyRequestReportTransactionsNavigation from './MoneyRequestReportView/MoneyRequestReportTransactionsNavigation';
+import {usePersonalDetails} from './OnyxListItemProvider';
 import {useSearchContext} from './Search/SearchContext';
 import {useWideRHPState} from './WideRHPContextProvider';
 
@@ -132,6 +133,7 @@ function MoneyRequestHeader({report, parentReportAction, policy, onBackButtonPre
     const [dismissedRejectUseExplanation] = useOnyx(ONYXKEYS.NVP_DISMISSED_REJECT_USE_EXPLANATION, {canBeMissing: true});
     const [dismissedHoldUseExplanation] = useOnyx(ONYXKEYS.NVP_DISMISSED_HOLD_USE_EXPLANATION, {canBeMissing: true});
     const shouldShowLoadingBar = useLoadingBarVisibility();
+    const personalDetails = usePersonalDetails();
     const styles = useThemeStyles();
     const theme = useTheme();
     const {translate, localeCompare} = useLocalize();
@@ -173,7 +175,7 @@ function MoneyRequestHeader({report, parentReportAction, policy, onBackButtonPre
     const [network] = useOnyx(ONYXKEYS.NETWORK, {canBeMissing: true});
     const [quickAction] = useOnyx(ONYXKEYS.NVP_QUICK_ACTION_GLOBAL_CREATE, {canBeMissing: true});
     const [isSelfTourViewed = false] = useOnyx(ONYXKEYS.NVP_ONBOARDING, {canBeMissing: true, selector: hasSeenTourSelector});
-
+    const [betas] = useOnyx(ONYXKEYS.BETAS, {canBeMissing: true});
     const markAsCash = useCallback(() => {
         markAsCashAction(transaction?.transactionID, reportID, transactionViolations);
     }, [reportID, transaction?.transactionID, transactionViolations]);
@@ -204,6 +206,8 @@ function MoneyRequestHeader({report, parentReportAction, policy, onBackButtonPre
                     targetPolicy: defaultExpensePolicy ?? undefined,
                     targetPolicyCategories: activePolicyCategories,
                     targetReport: activePolicyExpenseChat,
+                    betas,
+                    personalDetails,
                 });
             }
         },
@@ -218,6 +222,8 @@ function MoneyRequestHeader({report, parentReportAction, policy, onBackButtonPre
             policyRecentlyUsedCurrencies,
             policy?.id,
             isSelfTourViewed,
+            betas,
+            personalDetails,
         ],
     );
 
