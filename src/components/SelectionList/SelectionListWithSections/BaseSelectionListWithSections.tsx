@@ -185,7 +185,7 @@ function BaseSelectionListWithSections<TItem extends ListItem>({
 
     useKeyboardShortcut(CONST.KEYBOARD_SHORTCUTS.ENTER || CONST.KEYBOARD_SHORTCUTS.CTRL_ENTER, selectFocusedItem, {
         captureOnInputs: true,
-        shouldBubble: !getFocusedItem(),
+        shouldBubble: itemsCount > 0 && !getFocusedItem(),
         shouldStopPropagation,
         isActive: !disableKeyboardShortcuts && isScreenFocused && focusedIndex >= 0 && !disableEnterShortcut,
     });
