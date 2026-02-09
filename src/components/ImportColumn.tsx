@@ -166,7 +166,6 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
 
     const columnValuesString = column.slice(containsHeader ? 1 : 0).join(', ');
 
-    // Current value from Onyx (may be set by saved column mappings)
     const currentColumnValue = spreadsheet?.columns?.[columnIndex];
     const autoDetectedColName = findColumnName(column.at(0) ?? '');
 
