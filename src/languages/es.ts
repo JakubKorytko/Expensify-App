@@ -7731,8 +7731,8 @@ ${amount} para ${merchant} - ${date}`,
     },
     cardTransactions: {
         notActivated: 'No activado',
-        outOfPocket: 'Reembolsable',
-        companySpend: 'No reembolsable',
+        outOfPocket: 'Gastos por cuenta propia',
+        companySpend: 'Gastos de empresa',
     },
     distance: {
         addStop: 'Añadir parada',

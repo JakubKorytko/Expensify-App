@@ -247,6 +247,7 @@ import type {LastVisibleMessage} from './ReportActionsUtils';
 // eslint-disable-next-line import/no-cycle
 import {
     buildReportNameFromParticipantNames,
+    // eslint-disable-next-line no-restricted-imports -- We plan to refactor this file to remove dependency on computeReportName
     computeReportName,
     computeReportNameBasedOnReportAction,
     generateArchivedReportName,
@@ -257,6 +258,7 @@ import {
     getMoneyRequestReportName,
     getPolicyExpenseChatName,
 } from './ReportNameUtils';
+import type {ArchivedReportsIDSet} from './SearchUIUtils';
 import {shouldRestrictUserBillableActions} from './SubscriptionUtils';
 import {
     getAttendees,
@@ -2240,7 +2242,13 @@ function getMostRecentlyVisitedReport(reports: Array<OnyxEntry<Report>>, reportM
  * This function is used to find the last accessed report and we don't need to subscribe the data in the UI.
  * So please use `Onyx.connectWithoutView()` to get the necessary data when we remove the `Onyx.connect()`
  */
-function findLastAccessedReport(ignoreDomainRooms: boolean, openOnAdminRoom = false, policyID?: string, excludeReportID?: string): OnyxEntry<Report> {
+function findLastAccessedReport(
+    ignoreDomainRooms: boolean,
+    openOnAdminRoom = false,
+    policyID?: string,
+    excludeReportID?: string,
+    archivedReportsIdSet?: ArchivedReportsIDSet,
+): OnyxEntry<Report> {
     // If it's the user's first time using New Expensify, then they could either have:
     //   - just a Concierge report, if so we'll return that
     //   - their Concierge report, and a separate report that must have deeplinked them to the app before they created their account.
@@ -2289,8 +2297,9 @@ function findLastAccessedReport(ignoreDomainRooms: boolean, openOnAdminRoom = fa
     // and it prompts the user to use the Concierge chat instead.
     reportsValues =
         reportsValues.filter((report) => {
-            const reportNameValuePairs = allReportNameValuePair?.[`${ONYXKEYS.COLLECTION.REPORT_NAME_VALUE_PAIRS}${report?.reportID}`];
-            return !isSystemChat(report) && !isArchivedReport(reportNameValuePairs);
+            const reportNameValuePairsKey = `${ONYXKEYS.COLLECTION.REPORT_NAME_VALUE_PAIRS}${report?.reportID}`;
+            const isArchived = archivedReportsIdSet ? archivedReportsIdSet.has(reportNameValuePairsKey) : isArchivedReport(allReportNameValuePair?.[reportNameValuePairsKey]);
+            return !isSystemChat(report) && !isArchived;
         }) ?? [];
 
     // At least two reports remain: self DM and Concierge chat.
@@ -4356,38 +4365,6 @@ function getMoneyRequestSpendBreakdown(report: OnyxInputOrEntry<Report>, searchR
     };
 }
 
-function getBillableAndTaxTotal(report: OnyxEntry<Report>, transactions: Array<OnyxEntry<Transaction>>) {
-    let billableTotal = 0;
-    let taxTotal = 0;
-    if (!isExpenseReport(report)) {
-        return {
-            billableTotal: 0,
-            taxTotal: 0,
-        };
-    }
-    for (const transaction of transactions) {
-        const {amount = 0, taxAmount = 0, currency, billable} = getTransactionDetails(transaction) ?? {};
-        if (billable) {
-            if (currency === report?.currency) {
-                billableTotal += amount;
-            } else {
-                billableTotal -= transaction?.convertedAmount ?? 0;
-            }
-        }
-        if (taxAmount) {
-            if (currency === report?.currency) {
-                taxTotal += taxAmount;
-            } else {
-                taxTotal -= transaction?.convertedTaxAmount ?? 0;
-            }
-        }
-    }
-    return {
-        billableTotal,
-        taxTotal,
-    };
-}
-
 /**
  * Given a report field, check if the field is for the report title.
  */
@@ -5672,8 +5649,6 @@ function getReportActionMessage({
 /**
  * Get the title for a report.
  * @deprecated Moved to src/libs/ReportNameUtils.ts.
- * Use ReportNameUtils.computeReportName for full name generation.
- * For reading a stored name only, use ReportNameUtils.getReportName.
  */
 function getReportName(
     report: OnyxEntry<Report>,
@@ -13193,7 +13168,6 @@ export {
     isOneTransactionReport,
     isTrackExpenseReportNew,
     shouldHideSingleReportField,
-    getBillableAndTaxTotal,
     getReportForHeader,
     isReportOpenOrUnsubmitted,
 };
