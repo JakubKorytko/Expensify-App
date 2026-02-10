@@ -151,4 +151,13 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
     return Promise.resolve();
 }
 
-export {setSpreadsheetData, setColumnName, closeImportPage, setContainsHeader, setImportTransactionCardName, setImportTransactionCurrency, setImportTransactionSettings, applySavedColumnMappings};
+export {
+    setSpreadsheetData,
+    setColumnName,
+    closeImportPage,
+    setContainsHeader,
+    setImportTransactionCardName,
+    setImportTransactionCurrency,
+    setImportTransactionSettings,
+    applySavedColumnMappings,
+};
