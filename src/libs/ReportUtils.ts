@@ -2749,7 +2749,9 @@ function isPayer(
     // If the report belongs to a workspace, verify the user is still a member
     // When a user leaves a workspace, they may no longer have access to the policy data,
     // or the policy.role/employeeList may be stale
-    if (iouReport?.policyID && iouReport.policyID !== CONST.POLICY.ID_FAKE) {
+    // Skip this check for IOU reports (personal 1:1 expenses) since they can inherit a policyID
+    // from the chat report but the payer may not be a member of that workspace
+    if (!isIOUReport(iouReport) && iouReport?.policyID && iouReport.policyID !== CONST.POLICY.ID_FAKE) {
         // No policy data means user likely left the workspace
         if (!policy) {
             return false;
