@@ -195,7 +195,7 @@ function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, c
 
                 // Get the header name for this column
                 if (containsHeader && data && colIndex >= 0 && colIndex < data.length) {
-                    const headerName = data[colIndex]?.[0];
+                    const headerName = data.at(colIndex)?.at(0);
                     if (headerName) {
                         names[role] = headerName;
                     }

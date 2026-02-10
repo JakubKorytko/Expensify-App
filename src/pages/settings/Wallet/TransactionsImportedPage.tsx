@@ -18,6 +18,7 @@ import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
 import ROUTES from '@src/ROUTES';
 import type SCREENS from '@src/SCREENS';
+import type SavedCSVColumnLayoutList from '@src/types/onyx/SavedCSVColumnLayout';
 import type {Errors} from '@src/types/onyx/OnyxCommon';
 import isLoadingOnyxValue from '@src/types/utils/isLoadingOnyxValue';
 
@@ -27,7 +28,10 @@ function TransactionsImportedPage({route}: TransactionsImportedPageProps) {
     const {cardID: existingCardID} = route.params ?? {};
     const {translate} = useLocalize();
     const [spreadsheet, spreadsheetMetadata] = useOnyx(ONYXKEYS.IMPORTED_SPREADSHEET, {canBeMissing: true});
-    const [savedColumnLayouts] = useOnyx(ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST, {canBeMissing: true});
+    const [savedColumnLayouts]: [SavedCSVColumnLayoutList | undefined] = useOnyx(
+        ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST,
+        {canBeMissing: true},
+    );
     const [isImporting, setIsImporting] = useState(false);
     const [isValidationEnabled, setIsValidationEnabled] = useState(false);
     const hasAppliedSavedMappings = useRef(false);

@@ -4,6 +4,19 @@ import ONYXKEYS from '@src/ONYXKEYS';
 import type {ImportTransactionSettings} from '@src/types/onyx/ImportedSpreadsheet';
 import type {SavedCSVColumnLayoutData} from '@src/types/onyx/SavedCSVColumnLayout';
 
+/** Type guard: narrows past Onyx's possible Error union to valid layout data */
+function isSavedCSVColumnLayoutData(value: unknown): value is SavedCSVColumnLayoutData {
+    return (
+        value !== null &&
+        typeof value === 'object' &&
+        !(value instanceof Error) &&
+        'columnMapping' in value &&
+        typeof (value as SavedCSVColumnLayoutData).columnMapping === 'object' &&
+        (value as SavedCSVColumnLayoutData).columnMapping !== null &&
+        'names' in (value as SavedCSVColumnLayoutData).columnMapping
+    );
+}
+
 function setSpreadsheetData(
     data: string[][],
     fileURI: string,
@@ -113,12 +126,10 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  * @returns Promise that resolves when column mappings are applied
  */
 function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
-    // Guard: ensure we have valid layout data and narrow past Onyx's possible Error union
-    if (savedLayout instanceof Error || !savedLayout?.columnMapping?.names) {
+    if (!isSavedCSVColumnLayoutData(savedLayout) || !savedLayout.columnMapping.names) {
         return Promise.resolve();
     }
-    const layout = savedLayout as SavedCSVColumnLayoutData;
-    const savedNames: SavedCSVColumnLayoutData['columnMapping']['names'] = layout.columnMapping.names;
+    const savedNames = savedLayout.columnMapping.names;
 
     // Build a map of column header names to column indexes (trimmed for comparison)
     const headerToIndex: Record<string, number> = {};
