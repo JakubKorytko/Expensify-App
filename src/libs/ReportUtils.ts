@@ -5782,12 +5782,14 @@ function getReportName(
 
             const movedFromReport = allReports?.[`${ONYXKEYS.COLLECTION.REPORT}${getMovedReportID(parentReportAction, CONST.REPORT.MOVE_TYPE.FROM)}`];
             const movedToReport = allReports?.[`${ONYXKEYS.COLLECTION.REPORT}${getMovedReportID(parentReportAction, CONST.REPORT.MOVE_TYPE.TO)}`];
-            const modifiedMessage = getForReportAction({
+            const modifiedMessageWithHTML = getForReportAction({
                 reportAction: parentReportAction,
                 policyID,
                 movedFromReport,
                 movedToReport,
             });
+            // Strip HTML tags for plain text display in report last message
+            const modifiedMessage = Parser.htmlToText(modifiedMessageWithHTML);
             return formatReportLastMessageText(modifiedMessage);
         }
         if (isTripRoom(report) && report?.reportName !== CONST.REPORT.DEFAULT_REPORT_NAME) {

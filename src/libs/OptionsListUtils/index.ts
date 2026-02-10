@@ -692,13 +692,15 @@ function getLastMessageTextForReport({
     } else if (isReportMessageAttachment({text: report?.lastMessageText ?? '', html: report?.lastMessageHtml, type: ''})) {
         lastMessageTextFromReport = `[${translate('common.attachment')}]`;
     } else if (isModifiedExpenseAction(lastReportAction)) {
-        const properSchemaForModifiedExpenseMessage = getForReportAction({
+        const properSchemaForModifiedExpenseMessageWithHTML = getForReportAction({
             reportAction: lastReportAction,
             policyID: report?.policyID,
             movedFromReport,
             movedToReport,
             policyForMovingExpensesID,
         });
+        // Strip HTML tags for plain text display in options list
+        const properSchemaForModifiedExpenseMessage = Parser.htmlToText(properSchemaForModifiedExpenseMessageWithHTML);
         lastMessageTextFromReport = formatReportLastMessageText(properSchemaForModifiedExpenseMessage, true);
     } else if (isMovedTransactionAction(lastReportAction)) {
         lastMessageTextFromReport = Parser.htmlToText(getMovedTransactionMessage(translate, lastReportAction));

@@ -762,7 +762,7 @@ const ContextMenuActions: ContextMenuAction[] = [
                     const displayMessage = html ?? text;
                     setClipboardMessage(displayMessage);
                 } else if (isModifiedExpenseAction(reportAction)) {
-                    const modifyExpenseMessage = getForReportActionTemp({
+                    const modifyExpenseMessageWithHTML = getForReportActionTemp({
                         translate,
                         reportAction,
                         policy,
@@ -770,6 +770,8 @@ const ContextMenuActions: ContextMenuAction[] = [
                         movedToReport,
                         policyTags,
                     });
+                    // Strip HTML tags for plain text clipboard copy
+                    const modifyExpenseMessage = Parser.htmlToText(modifyExpenseMessageWithHTML);
                     Clipboard.setString(modifyExpenseMessage);
                 } else if (isReimbursementDeQueuedOrCanceledAction(reportAction)) {
                     const displayMessage = getReimbursementDeQueuedOrCanceledActionMessage(translate, reportAction, report);
