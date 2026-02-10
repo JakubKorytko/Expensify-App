@@ -114,7 +114,10 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  */
 function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
     // Guard: ensure we have valid layout data and narrow past Onyx's possible Error union
-    if (savedLayout instanceof Error || !savedLayout?.columnMapping?.names) {
+    if (savedLayout instanceof Error) {
+        return Promise.resolve();
+    }
+    if (!savedLayout?.columnMapping?.names) {
         return Promise.resolve();
     }
     const layout = savedLayout as SavedCSVColumnLayoutData;
