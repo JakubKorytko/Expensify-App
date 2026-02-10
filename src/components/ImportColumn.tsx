@@ -170,7 +170,7 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const autoDetectedColName = findColumnName(column.at(0) ?? '');
 
     // Selected index: prefer Onyx value, fall back to auto-detected, default to 0
-    const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue || autoDetectedColName)) ?? -1;
+    const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue ?? autoDetectedColName)) ?? -1;
     const selectedIndex = foundIndex !== -1 ? foundIndex : 0;
 
     useEffect(() => {

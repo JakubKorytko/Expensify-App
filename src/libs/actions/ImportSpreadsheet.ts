@@ -113,19 +113,20 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  * @returns Promise that resolves when column mappings are applied
  */
 function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
-    const savedNames = savedLayout.columnMapping?.names;
-    if (!savedNames) {
+    // Guard: ensure we have valid layout data (narrows type for strict linting)
+    if (!savedLayout?.columnMapping?.names) {
         return Promise.resolve();
     }
+    const savedNames = savedLayout.columnMapping.names;
 
     // Build a map of column header names to column indexes (trimmed for comparison)
     const headerToIndex: Record<string, number> = {};
-    spreadsheetData.forEach((column, index) => {
-        const headerName = column[0]?.trim();
+    for (const [index, column] of spreadsheetData.entries()) {
+        const headerName = column.at(0)?.trim();
         if (headerName) {
             headerToIndex[headerName] = index;
         }
-    });
+    }
 
     // For each saved role -> column name mapping, find the matching column index
     const columnUpdates: Record<number, string> = {};
