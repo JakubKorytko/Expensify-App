@@ -7485,8 +7485,8 @@ const translations = {
     },
     cardTransactions: {
         notActivated: 'Not activated',
-        outOfPocket: 'Reimbursable',
-        companySpend: 'Non-reimbursable',
+        outOfPocket: 'Out-of-pocket spend',
+        companySpend: 'Company spend',
     },
     distance: {
         addStop: 'Add stop',

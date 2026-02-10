@@ -7561,8 +7561,8 @@ Rendez obligatoires des informations de dépense comme les reçus et les descrip
     },
     cardTransactions: {
         notActivated: 'Non activé',
-        outOfPocket: 'Remboursable',
-        companySpend: 'Non remboursable',
+        outOfPocket: 'Dépenses personnelles',
+        companySpend: 'Dépenses de l’entreprise',
     },
     distance: {
         addStop: 'Ajouter un arrêt',

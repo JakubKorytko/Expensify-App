@@ -7546,8 +7546,8 @@ Fordern Sie Spesendetails wie Belege und Beschreibungen an, legen Sie Limits und
     },
     cardTransactions: {
         notActivated: 'Nicht aktiviert',
-        outOfPocket: 'Erstattungsfähig',
-        companySpend: 'Nicht erstattungsfähig',
+        outOfPocket: 'Auslagen-Spend',
+        companySpend: 'Unternehmensausgaben',
     },
     distance: {
         addStop: 'Stopp hinzufügen',
