@@ -52,6 +52,7 @@ function end(eventName: string, secondaryName = '', maxExecutionTime = 0) {
         delete timestampData[eventName];
 
         if (Environment.isDevelopment()) {
+            // Don't create traces on dev as this will mess up the accuracy of data in release builds of the app
             return;
         }
 
