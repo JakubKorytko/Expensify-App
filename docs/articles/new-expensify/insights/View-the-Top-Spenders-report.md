@@ -5,7 +5,7 @@ keywords: New Expensify, Top Spenders, employee spending, high spenders, expense
 internalScope: Audience is Workspace Admins, Approvers, and Auditors. Covers using the Top Spenders suggested search to view employee-level spending. Does not cover custom reports, exporting data, or grouping by category or merchant.
 ---
 
-# View the Top Spenders report in New Expensify
+# View the Top Spenders report
 
 The **Top Spenders** report shows which employees submitted the highest total expenses last month. It’s a fast way to:
 
@@ -33,7 +33,7 @@ Use the navigation tabs on the left and select **Reports**, then click **Top spe
 **Mobile:**  
 Tap **Reports** from the navigation tabs on the bottom, then tap the hamburger menu in the top-right corner. Under **Insights**, tap **Top spenders**.
 
-![Reports page in New Expensify showing the Top spenders view]({{site.url}}/assets/images/top-spender.png)
+![Top spenders report]({{site.url}}/assets/images/top-spender.png)
 
 ---
 
@@ -91,14 +91,14 @@ Not directly — the Top Spenders report can’t be exported with its grouped to
 2. Apply filters to create your own view.
 3. Click **Export to CSV**.
 
-## Will more report types like Top Spenders be added?
+## What other Insights reports are available?
 
-Yes! Top Spenders is the first of many suggested insights. Upcoming reports will include:
+Additional Insights reports help you analyze spending from different perspectives:
 
-- Spend by category
-- Spend over time
-- Merchant trends
-- Other insights visible under the **Reports** tab
+- **Top Categories** - View spending by expense category
+- **Top Merchants** - View spending by vendor or merchant
+
+[Learn more about all available Insights](https://help.expensify.com/articles/new-expensify/insights/Insights-Overview)
 
 ## Can other people see my Top Spenders report?
 
