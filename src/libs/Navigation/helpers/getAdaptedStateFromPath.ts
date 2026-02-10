@@ -17,7 +17,7 @@ import type {Report} from '@src/types/onyx';
 import getMatchingNewRoute from './getMatchingNewRoute';
 import getParamsFromRoute from './getParamsFromRoute';
 import getRedirectedPath from './getRedirectedPath';
-import {isFullScreenName} from './isNavigatorName';
+import {isFullScreenName, isPublicScreenName} from './isNavigatorName';
 import normalizePath from './normalizePath';
 import replacePathInNestedState from './replacePathInNestedState';
 
@@ -177,11 +177,17 @@ function getMatchingFullScreenRoute(route: NavigationPartialRoute) {
 // This is separated from getMatchingFullScreenRoute because we want to use it only for the initial state.
 // We don't want to make this route mandatory e.g. after deep linking or opening a specific flow.
 function getDefaultFullScreenRoute(route?: NavigationPartialRoute) {
+    // PublicScreens navigator doesn't have REPORTS_SPLIT_NAVIGATOR, so public screens need SCREENS.HOME as fallback
+    // We will use it if the reportID is not defined. Router of this navigator has logic to fill it with a report.
+    const fallbackRoute = {
+        name: isPublicScreenName(route?.name) ? SCREENS.HOME : NAVIGATORS.REPORTS_SPLIT_NAVIGATOR,
+    };
+
     if (route && isRouteWithReportID(route)) {
         const reportID = route.params.reportID;
 
         if (!allReports?.[`${ONYXKEYS.COLLECTION.REPORT}${reportID}`]?.reportID) {
-            return {name: NAVIGATORS.REPORTS_SPLIT_NAVIGATOR};
+            return fallbackRoute;
         }
 
         return getInitialSplitNavigatorState(
@@ -195,7 +201,7 @@ function getDefaultFullScreenRoute(route?: NavigationPartialRoute) {
         );
     }
 
-    return {name: SCREENS.HOME};
+    return fallbackRoute;
 }
 
 function getOnboardingAdaptedState(state: PartialState<NavigationState>): PartialState<NavigationState> {
