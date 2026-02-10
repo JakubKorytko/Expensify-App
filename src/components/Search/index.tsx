@@ -1354,6 +1354,72 @@ function Search({
         endSpan(CONST.TELEMETRY.SPAN_ON_LAYOUT_SKELETON_REPORTS);
     }, []);
 
+    const onSortPress = useCallback(
+        (column: SearchColumnType, order: SortOrder) => {
+            clearSelectedTransactions();
+            const newQuery = buildSearchQueryString({...queryJSON, sortBy: column, sortOrder: order});
+            onSortPressedCallback?.();
+            // We want to explicitly clear stale rawQuery since it's only used for manually typed-in queries.
+            navigation.setParams({q: newQuery, rawQuery: undefined});
+        },
+        [clearSelectedTransactions, queryJSON, onSortPressedCallback, navigation],
+    );
+
+    const searchData = searchResults?.data ?? [];
+    const {shouldShowYearCreated, shouldShowYearSubmitted, shouldShowYearApproved, shouldShowYearPosted, shouldShowYearExported} = shouldShowYearUtil(
+        searchData,
+        isExpenseReportType ?? false,
+    );
+    const {shouldShowAmountInWideColumn, shouldShowTaxAmountInWideColumn} = getWideAmountIndicators(searchData);
+    const shouldShowTableHeader = isLargeScreenWidth && !isChat;
+    const tableHeaderVisible = canSelectMultiple || shouldShowTableHeader;
+
+    const searchTableHeader = useMemo(() => {
+        if (!shouldShowTableHeader) {
+            return undefined;
+        }
+        return (
+            <View style={[!isTask && styles.pr8, styles.flex1]}>
+                <SearchTableHeader
+                    canSelectMultiple={canSelectMultiple}
+                    columns={columnsToShow}
+                    type={type}
+                    onSortPress={onSortPress}
+                    sortOrder={sortOrder}
+                    sortBy={sortBy}
+                    shouldShowYear={shouldShowYearCreated}
+                    shouldShowYearSubmitted={shouldShowYearSubmitted}
+                    shouldShowYearApproved={shouldShowYearApproved}
+                    shouldShowYearPosted={shouldShowYearPosted}
+                    shouldShowYearExported={shouldShowYearExported}
+                    isAmountColumnWide={shouldShowAmountInWideColumn}
+                    isTaxAmountColumnWide={shouldShowTaxAmountInWideColumn}
+                    shouldShowSorting
+                    groupBy={validGroupBy}
+                />
+            </View>
+        );
+    }, [
+        shouldShowTableHeader,
+        isTask,
+        styles.pr8,
+        styles.flex1,
+        canSelectMultiple,
+        columnsToShow,
+        type,
+        onSortPress,
+        sortOrder,
+        sortBy,
+        shouldShowYearCreated,
+        shouldShowYearSubmitted,
+        shouldShowYearApproved,
+        shouldShowYearPosted,
+        shouldShowYearExported,
+        shouldShowAmountInWideColumn,
+        shouldShowTaxAmountInWideColumn,
+        validGroupBy,
+    ]);
+
     if (shouldShowLoadingState) {
         return (
             <Animated.View
@@ -1407,22 +1473,6 @@ function Search({
         );
     }
 
-    const onSortPress = (column: SearchColumnType, order: SortOrder) => {
-        clearSelectedTransactions();
-        const newQuery = buildSearchQueryString({...queryJSON, sortBy: column, sortOrder: order});
-        onSortPressedCallback?.();
-        // We want to explicitly clear stale rawQuery since it's only used for manually typed-in queries.
-        navigation.setParams({q: newQuery, rawQuery: undefined});
-    };
-
-    const {shouldShowYearCreated, shouldShowYearSubmitted, shouldShowYearApproved, shouldShowYearPosted, shouldShowYearExported} = shouldShowYearUtil(
-        searchResults?.data,
-        isExpenseReportType ?? false,
-    );
-    const {shouldShowAmountInWideColumn, shouldShowTaxAmountInWideColumn} = getWideAmountIndicators(searchResults?.data);
-    const shouldShowTableHeader = isLargeScreenWidth && !isChat;
-    const tableHeaderVisible = canSelectMultiple || shouldShowTableHeader;
-
     const shouldShowChartView = (view === CONST.SEARCH.VIEW.BAR || view === CONST.SEARCH.VIEW.LINE) && !!validGroupBy;
 
     if (shouldShowChartView && isGroupedItemArray(sortedData)) {
@@ -1455,29 +1505,7 @@ function Search({
                     shouldPreventLongPressRow={isChat || isTask}
                     onDEWModalOpen={handleDEWModalOpen}
                     isDEWBetaEnabled={isDEWBetaEnabled}
-                    SearchTableHeader={
-                        !shouldShowTableHeader ? undefined : (
-                            <View style={[!isTask && styles.pr8, styles.flex1]}>
-                                <SearchTableHeader
-                                    canSelectMultiple={canSelectMultiple}
-                                    columns={columnsToShow}
-                                    type={type}
-                                    onSortPress={onSortPress}
-                                    sortOrder={sortOrder}
-                                    sortBy={sortBy}
-                                    shouldShowYear={shouldShowYearCreated}
-                                    shouldShowYearSubmitted={shouldShowYearSubmitted}
-                                    shouldShowYearApproved={shouldShowYearApproved}
-                                    shouldShowYearPosted={shouldShowYearPosted}
-                                    shouldShowYearExported={shouldShowYearExported}
-                                    isAmountColumnWide={shouldShowAmountInWideColumn}
-                                    isTaxAmountColumnWide={shouldShowTaxAmountInWideColumn}
-                                    shouldShowSorting
-                                    groupBy={validGroupBy}
-                                />
-                            </View>
-                        )
-                    }
+                    SearchTableHeader={searchTableHeader}
                     contentContainerStyle={[styles.pb3, contentContainerStyle]}
                     containerStyle={[styles.pv0, !tableHeaderVisible && !isSmallScreenWidth && styles.pt3]}
                     shouldPreventDefaultFocusOnSelectRow={!canUseTouchScreen()}
