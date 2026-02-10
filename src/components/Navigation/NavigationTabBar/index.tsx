@@ -50,6 +50,7 @@ import SCREENS from '@src/SCREENS';
 import type {Screen} from '@src/SCREENS';
 import type {Domain, Policy, Report} from '@src/types/onyx';
 import NAVIGATION_TABS from './NAVIGATION_TABS';
+import Timing from '@libs/Timing';
 
 type NavigationTabBarProps = {
     selectedTab: ValueOf<typeof NAVIGATION_TABS>;
@@ -221,7 +222,7 @@ function NavigationTabBar({selectedTab, isTopLevelBar = false, shouldShowFloatin
                 name: CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB,
                 op: CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB,
             });
-
+            Timing.start(CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB);
             startSpan(CONST.TELEMETRY.SPAN_ON_LAYOUT_SKELETON_REPORTS, {
                 name: CONST.TELEMETRY.SPAN_ON_LAYOUT_SKELETON_REPORTS,
                 op: CONST.TELEMETRY.SPAN_ON_LAYOUT_SKELETON_REPORTS,

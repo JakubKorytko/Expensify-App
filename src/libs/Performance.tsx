@@ -190,6 +190,21 @@ function markEnd(name: string, detail?: Record<string, unknown>): PerformanceMar
     return performance.mark(`${name}_end`, {detail});
 }
 
+/**
+ * Measure duration between start and end marks, and return it.
+ * Use after markEnd(name) to get the span duration without depending on the observer.
+ * Returns undefined if the measure fails (e.g. start mark missing).
+ */
+function getMeasureDuration(name: string): number | undefined {
+    try {
+        measureFailSafe(name, `${name}_start`, `${name}_end`);
+        const measure = performance.getEntriesByName(name).find((entry) => entry.entryType === 'measure');
+        return measure?.duration;
+    } catch {
+        return undefined;
+    }
+}
+
 type Phase = 'mount' | 'update' | 'nested-update';
 
 /**
@@ -263,6 +278,7 @@ export default {
     disableMonitoring,
     getPerformanceMetrics,
     getPerformanceMeasures,
+    getMeasureDuration,
     printPerformanceMetrics,
     subscribeToMeasurements,
     markStart,

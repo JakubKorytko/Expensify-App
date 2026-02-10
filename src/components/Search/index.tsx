@@ -97,6 +97,7 @@ import {useSearchContext} from './SearchContext';
 import SearchList from './SearchList';
 import {SearchScopeProvider} from './SearchScopeProvider';
 import type {SearchColumnType, SearchParams, SearchQueryJSON, SelectedTransactionInfo, SelectedTransactions, SortOrder} from './types';
+import Timing from '@libs/Timing';
 
 type SearchProps = {
     queryJSON: SearchQueryJSON;
@@ -1324,6 +1325,7 @@ function Search({
     ]);
 
     const onLayout = useCallback(() => {
+        Timing.end(CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB);
         endSpan(CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB);
         endSpan(CONST.TELEMETRY.SPAN_NAVIGATE_TO_REPORTS_TAB_RENDER);
         handleSelectionListScroll(sortedData, searchListRef.current);
