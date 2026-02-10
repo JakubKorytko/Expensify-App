@@ -661,10 +661,7 @@ function handleMoneyRequestStepDistanceNavigation({
             lastSelectedDistanceRates,
         });
         setTransactionReport(transactionID, {reportID: transactionReportID}, true);
-        // Do not pass transaction and policy so it only updates customUnitRateID without changing distance and distance unit
-        // as it is set for Manual requests before this function is called and transaction may have
-        // obsolete customUnit values
-        setCustomUnitRateID(transactionID, rateID, undefined, undefined);
+        setCustomUnitRateID(transactionID, rateID);
         setMoneyRequestParticipantsFromReport(transactionID, targetReport, currentUserAccountID).then(() => {
             Navigation.navigate(ROUTES.MONEY_REQUEST_STEP_CONFIRMATION.getRoute(CONST.IOU.ACTION.CREATE, iouTypeTrackOrSubmit, transactionID, targetReport?.reportID));
         });
