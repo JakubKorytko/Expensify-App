@@ -113,15 +113,10 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  * @returns Promise that resolves when column mappings are applied
  */
 function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
-    // Guard: ensure we have valid layout data and narrow past Onyx's possible Error union
-    if (savedLayout instanceof Error) {
-        return Promise.resolve();
-    }
     if (!savedLayout?.columnMapping?.names) {
         return Promise.resolve();
     }
-    const layout = savedLayout as SavedCSVColumnLayoutData;
-    const savedNames: SavedCSVColumnLayoutData['columnMapping']['names'] = layout.columnMapping.names;
+    const savedNames: SavedCSVColumnLayoutData['columnMapping']['names'] = savedLayout.columnMapping.names;
 
     // Build a map of column header names to column indexes (trimmed for comparison)
     const headerToIndex: Record<string, number> = {};
