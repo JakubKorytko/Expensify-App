@@ -1420,6 +1420,16 @@ function Search({
         validGroupBy,
     ]);
 
+    const searchListContentContainerStyle = useMemo(
+        () => (contentContainerStyle ? [styles.pb3, contentContainerStyle] : styles.pb3),
+        [contentContainerStyle, styles.pb3],
+    );
+
+    const searchListContainerStyle = useMemo(
+        () => [styles.pv0, !tableHeaderVisible && !isSmallScreenWidth && styles.pt3],
+        [tableHeaderVisible, isSmallScreenWidth, styles.pv0, styles.pt3],
+    );
+
     if (shouldShowLoadingState) {
         return (
             <Animated.View
@@ -1506,8 +1516,8 @@ function Search({
                     onDEWModalOpen={handleDEWModalOpen}
                     isDEWBetaEnabled={isDEWBetaEnabled}
                     SearchTableHeader={searchTableHeader}
-                    contentContainerStyle={[styles.pb3, contentContainerStyle]}
-                    containerStyle={[styles.pv0, !tableHeaderVisible && !isSmallScreenWidth && styles.pt3]}
+                    contentContainerStyle={searchListContentContainerStyle}
+                    containerStyle={searchListContainerStyle}
                     shouldPreventDefaultFocusOnSelectRow={!canUseTouchScreen()}
                     onScroll={onSearchListScroll}
                     onEndReachedThreshold={0.75}
