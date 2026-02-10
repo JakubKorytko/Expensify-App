@@ -110,11 +110,10 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  *
  * @param spreadsheetData - The spreadsheet data in column-major format
  * @param savedLayout - The saved column layout for this card
- * @returns Promise that resolves when column mappings are applied
  */
-function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): Promise<void | void[]> {
+function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): void {
     if (!savedLayout?.columnMapping?.names) {
-        return Promise.resolve();
+        return;
     }
     const savedNames: SavedCSVColumnLayoutData['columnMapping']['names'] = savedLayout.columnMapping.names;
 
@@ -145,10 +144,8 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
 
     // If we found any matching columns, apply the mappings
     if (Object.keys(columnUpdates).length > 0) {
-        return Onyx.merge(ONYXKEYS.IMPORTED_SPREADSHEET, {columns: columnUpdates});
+        Onyx.merge(ONYXKEYS.IMPORTED_SPREADSHEET, {columns: columnUpdates});
     }
-
-    return Promise.resolve();
 }
 
 export {
