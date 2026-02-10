@@ -69,6 +69,23 @@ Depending on your role, you’ll see shortcuts like:
 
 ---
 
+# Bulk Selection and Export
+
+When viewing filtered search results, the header checkbox selects only the expenses currently loaded on screen (typically the first 50 items). To select and export all filtered results:
+
+## To select all filtered expenses:
+1. Keep your filters active (e.g., date range Jan 1–31).
+2. Scroll to the bottom of the list until no new expenses load.
+3. Scroll back to the top and click the header checkbox—it will now select all loaded expenses.
+4. Click **Selected > Export** and choose your export template.
+
+## For very large result sets:
+- Break your date range into smaller chunks (e.g., Jan 1–15 and Jan 16–31).
+- Export each range separately.
+- Combine the CSV files in Excel or Google Sheets afterward.
+
+---
+
 # FAQ
 
 ## What if I don't see the Submit, Approve, Pay or Export options?

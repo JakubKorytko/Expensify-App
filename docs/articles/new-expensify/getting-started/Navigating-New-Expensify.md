@@ -8,6 +8,19 @@ New Expensify features an intuitive, cross-platform navigation experience that m
 
 ---
 
+# Overview: Your Main Navigation Areas
+
+New Expensify is organized into four main tabs:
+
+- **Inbox** – Your homepage and main to-do list: things to submit, approve, or fix, plus your chats and reports. Click the Expensify logo anytime to return here.
+- **Reports** – Search and filter for anything: expenses, reports, chats, trips, and more.
+- **Workspaces** – All company settings: members, approvals, categories, accounting connections, company cards, and more.
+- **Account** – Your personal profile and settings: contact info, security/2FA, notifications, subscription, and preferences.
+
+On web, these tabs appear on the left; on mobile, they're along the bottom. The green camera/receipt button is always available for creating expenses, and the grey "+" button provides access to additional actions like creating reports, tracking distance, or sending invoices.
+
+---
+
 # Navigation tabs
 
 The **navigation tabs** (on the left on web, and at the bottom on mobile) are primary orientation hubs in your account. They includes:
