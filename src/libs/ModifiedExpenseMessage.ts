@@ -317,8 +317,8 @@ function getForReportAction({
         buildMessageFragmentForValue(
             // eslint-disable-next-line @typescript-eslint/no-deprecated
             translateLocal,
-            Parser.htmlToMarkdown(reportActionOriginalMessage?.newComment ?? ''),
-            Parser.htmlToMarkdown(reportActionOriginalMessage?.oldComment ?? ''),
+            Parser.htmlToText(reportActionOriginalMessage?.newComment ?? ''),
+            Parser.htmlToText(reportActionOriginalMessage?.oldComment ?? ''),
             descriptionLabel,
             true,
             setFragments,
@@ -615,8 +615,8 @@ function getForReportActionTemp({
 
         buildMessageFragmentForValue(
             translate,
-            Parser.htmlToMarkdown(reportActionOriginalMessage?.newComment ?? ''),
-            Parser.htmlToMarkdown(reportActionOriginalMessage?.oldComment ?? ''),
+            Parser.htmlToText(reportActionOriginalMessage?.newComment ?? ''),
+            Parser.htmlToText(reportActionOriginalMessage?.oldComment ?? ''),
             descriptionLabel,
             true,
             setFragments,
