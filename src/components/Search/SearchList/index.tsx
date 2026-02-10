@@ -2,19 +2,16 @@ import {useFocusEffect, useRoute} from '@react-navigation/native';
 import {isUserValidatedSelector} from '@selectors/Account';
 import {tierNameSelector} from '@selectors/UserWallet';
 import type {FlashListProps, FlashListRef, ViewToken} from '@shopify/flash-list';
-import React, {useCallback, useContext, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useContext, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import type {ForwardedRef} from 'react';
 import {View} from 'react-native';
 // eslint-disable-next-line no-restricted-imports
-import type {NativeScrollEvent, NativeSyntheticEvent, ScrollView as RNScrollView, StyleProp, ViewStyle} from 'react-native';
+import type {NativeSyntheticEvent, StyleProp, ViewStyle} from 'react-native';
 import Animated, {Easing, FadeOutUp, LinearTransition} from 'react-native-reanimated';
-import Checkbox from '@components/Checkbox';
 import MenuItem from '@components/MenuItem';
 import Modal from '@components/Modal';
 import {usePersonalDetails} from '@components/OnyxListItemProvider';
-import {PressableWithFeedback} from '@components/Pressable';
 import {ScrollOffsetContext} from '@components/ScrollOffsetContextProvider';
-import ScrollView from '@components/ScrollView';
 import type {SearchColumnType, SearchGroupBy, SearchQueryJSON, SelectedTransactions} from '@components/Search/types';
 import type ChatListItem from '@components/SelectionListWithSections/ChatListItem';
 import type TaskListItem from '@components/SelectionListWithSections/Search/TaskListItem';
@@ -34,7 +31,6 @@ import type {
     TransactionWeekGroupListItemType,
     TransactionYearGroupListItemType,
 } from '@components/SelectionListWithSections/types';
-import Text from '@components/Text';
 import useKeyboardState from '@hooks/useKeyboardState';
 import {useMemoizedLazyExpensifyIcons} from '@hooks/useLazyAsset';
 import useLocalize from '@hooks/useLocalize';
@@ -44,11 +40,10 @@ import usePrevious from '@hooks/usePrevious';
 import useResponsiveLayout from '@hooks/useResponsiveLayout';
 import useSafeAreaPaddings from '@hooks/useSafeAreaPaddings';
 import useThemeStyles from '@hooks/useThemeStyles';
-import useWindowDimensions from '@hooks/useWindowDimensions';
 import {turnOnMobileSelectionMode} from '@libs/actions/MobileSelectionMode';
 import DateUtils from '@libs/DateUtils';
 import navigationRef from '@libs/Navigation/navigationRef';
-import {getTableMinWidth, isTransactionReportGroupListItemType} from '@libs/SearchUIUtils';
+import {isTransactionReportGroupListItemType} from '@libs/SearchUIUtils';
 import variables from '@styles/variables';
 import type {TransactionPreviewData} from '@userActions/Search';
 import CONST from '@src/CONST';
@@ -57,9 +52,6 @@ import type {Transaction, TransactionViolations} from '@src/types/onyx';
 import BaseSearchList from './BaseSearchList';
 
 const easing = Easing.bezier(0.76, 0.0, 0.24, 1.0);
-
-// Keep a ref to the horizontal scroll offset so we can restore it if users change the search query
-let savedHorizontalScrollOffset = 0;
 
 type SearchListItem = TransactionListItemType | TransactionGroupListItemType | ReportActionListItemType | TaskListItemType;
 type SearchListItemComponentType = typeof TransactionListItem | typeof ChatListItem | typeof TransactionGroupListItem | typeof TaskListItem;
@@ -74,8 +66,6 @@ type SearchListProps = Pick<FlashListProps<SearchListItem>, 'onScroll' | 'conten
     /** Default renderer for every item in the list */
     ListItem: SearchListItemComponentType;
 
-    SearchTableHeader?: React.JSX.Element;
-
     /** Callback to fire when a row is pressed */
     onSelectRow: (item: SearchListItem, transactionPreviewData?: TransactionPreviewData) => void;
 
@@ -84,9 +74,6 @@ type SearchListProps = Pick<FlashListProps<SearchListItem>, 'onScroll' | 'conten
 
     /** Callback to fire when a checkbox is pressed */
     onCheckboxPress: (item: SearchListItem, itemTransactions?: TransactionListItemType[]) => void;
-
-    /** Callback to fire when "Select All" checkbox is pressed. Only use along with `canSelectMultiple` */
-    onAllCheckboxPress: () => void;
 
     /** Styles to apply to SelectionList container */
     containerStyle?: StyleProp<ViewStyle>;
@@ -134,9 +121,6 @@ type SearchListProps = Pick<FlashListProps<SearchListItem>, 'onScroll' | 'conten
 
     /** Selected transactions for determining isSelected state */
     selectedTransactions: SelectedTransactions;
-
-    /** Whether all transactions have been loaded from snapshots in group-by views */
-    hasLoadedAllTransactions?: boolean;
 
     /** Reference to the outer element */
     ref?: ForwardedRef<SearchListHandle>;
@@ -198,12 +182,10 @@ function isTransactionMatchWithGroupItem(transaction: Transaction, groupItem: Se
 function SearchList({
     data,
     ListItem,
-    SearchTableHeader,
     onSelectRow,
     onCheckboxPress,
     canSelectMultiple,
     onScroll = () => {},
-    onAllCheckboxPress,
     contentContainerStyle,
     onEndReachedThreshold,
     onEndReached,
@@ -223,7 +205,6 @@ function SearchList({
     onDEWModalOpen,
     isDEWBetaEnabled,
     selectedTransactions,
-    hasLoadedAllTransactions,
     ref,
 }: SearchListProps) {
     const styles = useThemeStyles();
@@ -239,52 +220,6 @@ function SearchList({
         }
         return data;
     }, [data, groupBy, type]);
-    const emptyReports = useMemo(() => {
-        if (type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT && isTransactionGroupListItemArray(data)) {
-            return data.filter((item) => item.transactions.length === 0);
-        }
-        return [];
-    }, [data, type]);
-
-    const selectedItemsLength = useMemo(() => {
-        const selectedTransactionsCount = flattenedItems.reduce((acc, item) => {
-            const isTransactionSelected = !!(item?.keyForList && selectedTransactions[item.keyForList]?.isSelected);
-            return acc + (isTransactionSelected ? 1 : 0);
-        }, 0);
-
-        if (type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT && isTransactionGroupListItemArray(data)) {
-            const selectedEmptyReports = emptyReports.reduce((acc, item) => {
-                const isEmptyReportSelected = !!(item.keyForList && selectedTransactions[item.keyForList]?.isSelected);
-                return acc + (isEmptyReportSelected ? 1 : 0);
-            }, 0);
-
-            return selectedEmptyReports + selectedTransactionsCount;
-        }
-
-        return selectedTransactionsCount;
-    }, [flattenedItems, type, data, emptyReports, selectedTransactions]);
-
-    const totalItems = useMemo(() => {
-        if (type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT && isTransactionGroupListItemArray(data)) {
-            const selectableEmptyReports = emptyReports.filter((item) => item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE);
-            const selectableTransactions = flattenedItems.filter((item) => {
-                if ('pendingAction' in item) {
-                    return item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
-                }
-                return true;
-            });
-            return selectableEmptyReports.length + selectableTransactions.length;
-        }
-
-        const selectableTransactions = flattenedItems.filter((item) => {
-            if ('pendingAction' in item) {
-                return item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
-            }
-            return true;
-        });
-        return selectableTransactions.length;
-    }, [data, type, flattenedItems, emptyReports]);
-
     const itemsWithSelection = useMemo(() => {
         return data.map((item) => {
             let isSelected = false;
@@ -365,24 +300,6 @@ function SearchList({
     const {getScrollOffset} = useContext(ScrollOffsetContext);
 
     const [longPressedItemTransactions, setLongPressedItemTransactions] = useState<TransactionListItemType[]>();
-
-    const {windowWidth} = useWindowDimensions();
-    const minTableWidth = getTableMinWidth(columns);
-    const shouldScrollHorizontally = !!SearchTableHeader && minTableWidth > windowWidth;
-
-    const horizontalScrollViewRef = useRef<RNScrollView>(null);
-
-    const handleHorizontalScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-        savedHorizontalScrollOffset = event.nativeEvent.contentOffset.x;
-    }, []);
-
-    // Restore horizontal scroll position synchronously before paint using useLayoutEffect to avoid a visible shift on the table
-    useLayoutEffect(() => {
-        if (!shouldScrollHorizontally || savedHorizontalScrollOffset <= 0) {
-            return;
-        }
-        horizontalScrollViewRef.current?.scrollTo({x: savedHorizontalScrollOffset, animated: false});
-    }, [data, shouldScrollHorizontally]);
 
     const handleLongPressRow = useCallback(
         (item: SearchListItem, itemTransactions?: TransactionListItemType[]) => {
@@ -529,43 +446,8 @@ function SearchList({
         ],
     );
 
-    const tableHeaderVisible = canSelectMultiple || !!SearchTableHeader;
-    const selectAllButtonVisible = canSelectMultiple && !SearchTableHeader;
-    const isSelectAllChecked = selectedItemsLength > 0 && selectedItemsLength === totalItems && hasLoadedAllTransactions;
-
     const content = (
         <View style={[styles.flex1, !isKeyboardShown && safeAreaPaddingBottomStyle, containerStyle]}>
-            {tableHeaderVisible && (
-                <View style={[styles.searchListHeaderContainerStyle, styles.listTableHeader]}>
-                    {canSelectMultiple && (
-                        <Checkbox
-                            accessibilityLabel={translate('workspace.people.selectAll')}
-                            isChecked={isSelectAllChecked}
-                            isIndeterminate={selectedItemsLength > 0 && (selectedItemsLength !== totalItems || !hasLoadedAllTransactions)}
-                            onPress={() => {
-                                onAllCheckboxPress();
-                            }}
-                            disabled={totalItems === 0}
-                        />
-                    )}
-
-                    {SearchTableHeader}
-
-                    {selectAllButtonVisible && (
-                        <PressableWithFeedback
-                            style={[styles.userSelectNone, styles.alignItemsCenter]}
-                            onPress={onAllCheckboxPress}
-                            accessibilityLabel={translate('workspace.people.selectAll')}
-                            role="button"
-                            accessibilityState={{checked: isSelectAllChecked}}
-                            sentryLabel={CONST.SENTRY_LABEL.SEARCH.SELECT_ALL_BUTTON}
-                            dataSet={{[CONST.SELECTION_SCRAPER_HIDDEN_ELEMENT]: true}}
-                        >
-                            <Text style={[styles.textMicroSupporting, styles.ph3]}>{translate('workspace.people.selectAll')}</Text>
-                        </PressableWithFeedback>
-                    )}
-                </View>
-            )}
             <BaseSearchList
                 data={data}
                 renderItem={renderItem}
@@ -601,23 +483,6 @@ function SearchList({
             </Modal>
         </View>
     );
-
-    if (shouldScrollHorizontally) {
-        return (
-            <ScrollView
-                ref={horizontalScrollViewRef}
-                horizontal
-                showsHorizontalScrollIndicator
-                style={styles.flex1}
-                contentContainerStyle={{width: minTableWidth}}
-                contentOffset={{x: savedHorizontalScrollOffset, y: 0}}
-                onScroll={handleHorizontalScroll}
-                scrollEventThrottle={16}
-            >
-                {content}
-            </ScrollView>
-        );
-    }
 
     return content;
 }

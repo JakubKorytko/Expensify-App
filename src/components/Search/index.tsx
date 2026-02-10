@@ -1,14 +1,18 @@
 import {findFocusedRoute, useFocusEffect, useIsFocused, useNavigation} from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import type {NativeScrollEvent, NativeSyntheticEvent, StyleProp, ViewStyle} from 'react-native';
 import {View} from 'react-native';
 import type {OnyxEntry} from 'react-native-onyx';
+import Checkbox from '@components/Checkbox';
+import {PressableWithFeedback} from '@components/Pressable';
+import ScrollView from '@components/ScrollView';
 import Animated, {FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withTiming} from 'react-native-reanimated';
 import FullPageErrorView from '@components/BlockingViews/FullPageErrorView';
 import FullPageOfflineBlockingView from '@components/BlockingViews/FullPageOfflineBlockingView';
 import {ModalActions} from '@components/Modal/Global/ModalContext';
 import SearchTableHeader from '@components/SelectionListWithSections/SearchTableHeader';
+import Text from '@components/Text';
 import type {
     ReportActionListItemType,
     SearchListItem,
@@ -30,6 +34,7 @@ import useOnyx from '@hooks/useOnyx';
 import usePermissions from '@hooks/usePermissions';
 import usePrevious from '@hooks/usePrevious';
 import useResponsiveLayout from '@hooks/useResponsiveLayout';
+import useWindowDimensions from '@hooks/useWindowDimensions';
 import useSearchHighlightAndScroll from '@hooks/useSearchHighlightAndScroll';
 import useSearchShouldCalculateTotals from '@hooks/useSearchShouldCalculateTotals';
 import useThemeStyles from '@hooks/useThemeStyles';
@@ -54,6 +59,7 @@ import {
     getSections,
     getSortedSections,
     getSuggestedSearches,
+    getTableMinWidth,
     getWideAmountIndicators,
     isGroupedItemArray,
     isReportActionListItemType,
@@ -109,6 +115,17 @@ type SearchProps = {
     searchRequestResponseStatusCode?: number | null;
     onDEWModalOpen?: () => void;
 };
+
+// Keep a ref to the horizontal scroll offset so we can restore it if users change the search query
+let savedHorizontalScrollOffset = 0;
+
+function isTransactionGroupListItemArray(data: SearchListItem[]): data is TransactionGroupListItemType[] {
+    if (data.length <= 0) {
+        return false;
+    }
+    const firstElement = data.at(0);
+    return typeof firstElement === 'object' && firstElement !== null && 'transactions' in firstElement;
+}
 
 function mapTransactionItemToSelectedEntry(
     item: TransactionListItemType,
@@ -1354,6 +1371,92 @@ function Search({
         endSpan(CONST.TELEMETRY.SPAN_ON_LAYOUT_SKELETON_REPORTS);
     }, []);
 
+    const searchData = searchResults?.data ?? [];
+    const {shouldShowYearCreated, shouldShowYearSubmitted, shouldShowYearApproved, shouldShowYearPosted, shouldShowYearExported} = shouldShowYearUtil(
+        searchData,
+        isExpenseReportType ?? false,
+    );
+    const {shouldShowAmountInWideColumn, shouldShowTaxAmountInWideColumn} = getWideAmountIndicators(searchData);
+    const shouldShowTableHeader = isLargeScreenWidth && !isChat;
+    const tableHeaderVisible = canSelectMultiple || shouldShowTableHeader;
+
+    const flattenedItems = useMemo(() => {
+        if (validGroupBy || type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT) {
+            if (!isTransactionGroupListItemArray(sortedData)) {
+                return sortedData;
+            }
+            return (sortedData as TransactionGroupListItemType[]).flatMap((item) => item.transactions);
+        }
+        return sortedData;
+    }, [sortedData, validGroupBy, type]);
+
+    const emptyReports = useMemo((): TransactionGroupListItemType[] => {
+        if (type !== CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT || !isTransactionGroupListItemArray(sortedData)) {
+            return [];
+        }
+        const data = sortedData as TransactionGroupListItemType[];
+        return data.filter((item) => item.transactions.length === 0);
+    }, [sortedData, type]);
+
+    const selectedItemsLength = useMemo(() => {
+        const selectedTransactionsCount = flattenedItems.reduce((acc, item) => {
+            const isTransactionSelected = !!(item?.keyForList && selectedTransactions[item.keyForList]?.isSelected);
+            return acc + (isTransactionSelected ? 1 : 0);
+        }, 0);
+
+        if (type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT && isTransactionGroupListItemArray(sortedData)) {
+            const selectedEmptyReports = emptyReports.reduce((acc, item) => {
+                const isEmptyReportSelected = !!(item.keyForList && selectedTransactions[item.keyForList]?.isSelected);
+                return acc + (isEmptyReportSelected ? 1 : 0);
+            }, 0);
+
+            return selectedEmptyReports + selectedTransactionsCount;
+        }
+
+        return selectedTransactionsCount;
+    }, [flattenedItems, type, sortedData, emptyReports, selectedTransactions]);
+
+    const totalItems = useMemo(() => {
+        if (type === CONST.SEARCH.DATA_TYPES.EXPENSE_REPORT && isTransactionGroupListItemArray(sortedData)) {
+            const selectableEmptyReports = emptyReports.filter((item) => item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE);
+            const selectableTransactions = flattenedItems.filter((item) => {
+                if ('pendingAction' in item) {
+                    return item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
+                }
+                return true;
+            });
+            return selectableEmptyReports.length + selectableTransactions.length;
+        }
+
+        const selectableTransactions = flattenedItems.filter((item) => {
+            if ('pendingAction' in item) {
+                return item.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
+            }
+            return true;
+        });
+        return selectableTransactions.length;
+    }, [sortedData, type, flattenedItems, emptyReports]);
+
+    const isSelectAllChecked = totalItems > 0 && selectedItemsLength === totalItems;
+    const isSelectAllIndeterminate = selectedItemsLength > 0 && selectedItemsLength < totalItems;
+    const selectAllButtonVisible = canSelectMultiple && !shouldShowTableHeader;
+
+    const {windowWidth} = useWindowDimensions();
+    const minTableWidth = getTableMinWidth(columnsToShow);
+    const shouldScrollHorizontally = tableHeaderVisible && minTableWidth > windowWidth;
+
+    const horizontalScrollViewRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+    const handleHorizontalScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        savedHorizontalScrollOffset = event.nativeEvent.contentOffset.x;
+    }, []);
+
+    useLayoutEffect(() => {
+        if (!shouldScrollHorizontally || savedHorizontalScrollOffset <= 0) {
+            return;
+        }
+        horizontalScrollViewRef.current?.scrollTo({x: savedHorizontalScrollOffset, animated: false});
+    }, [sortedData, shouldScrollHorizontally]);
+
     if (shouldShowLoadingState) {
         return (
             <Animated.View
@@ -1415,14 +1518,6 @@ function Search({
         navigation.setParams({q: newQuery, rawQuery: undefined});
     };
 
-    const {shouldShowYearCreated, shouldShowYearSubmitted, shouldShowYearApproved, shouldShowYearPosted, shouldShowYearExported} = shouldShowYearUtil(
-        searchResults?.data,
-        isExpenseReportType ?? false,
-    );
-    const {shouldShowAmountInWideColumn, shouldShowTaxAmountInWideColumn} = getWideAmountIndicators(searchResults?.data);
-    const shouldShowTableHeader = isLargeScreenWidth && !isChat;
-    const tableHeaderVisible = canSelectMultiple || shouldShowTableHeader;
-
     const shouldShowChartView = (view === CONST.SEARCH.VIEW.BAR || view === CONST.SEARCH.VIEW.LINE) && !!validGroupBy;
 
     if (shouldShowChartView && isGroupedItemArray(sortedData)) {
@@ -1440,68 +1535,119 @@ function Search({
         );
     }
 
+    const searchListContent = (
+        <SearchList
+            ref={searchListRef}
+            data={sortedData}
+            ListItem={ListItem}
+            onSelectRow={onSelectRow}
+                    onCheckboxPress={toggleTransaction}
+                    canSelectMultiple={canSelectMultiple}
+            selectedTransactions={selectedTransactions}
+            shouldPreventLongPressRow={isChat || isTask}
+            onDEWModalOpen={handleDEWModalOpen}
+            isDEWBetaEnabled={isDEWBetaEnabled}
+            contentContainerStyle={[styles.pb3, contentContainerStyle]}
+            containerStyle={[styles.pv0, !tableHeaderVisible && !isSmallScreenWidth && styles.pt3]}
+            shouldPreventDefaultFocusOnSelectRow={!canUseTouchScreen()}
+            onScroll={onSearchListScroll}
+            onEndReachedThreshold={0.75}
+            onEndReached={fetchMoreResults}
+            ListFooterComponent={
+                shouldShowLoadingMoreItems ? (
+                    <SearchRowSkeleton
+                        shouldAnimate
+                        fixedNumItems={5}
+                    />
+                ) : undefined
+            }
+            queryJSON={queryJSON}
+            columns={columnsToShow}
+            violations={violations}
+            onLayout={onLayout}
+            isMobileSelectionModeEnabled={isMobileSelectionModeEnabled}
+            shouldAnimate={type === CONST.SEARCH.DATA_TYPES.EXPENSE}
+                    newTransactions={newTransactions}
+                    customCardNames={customCardNames}
+        />
+    );
+
+    const headerRow =
+        tableHeaderVisible && (
+            <View style={[styles.userSelectNone, styles.peopleRow, styles.ph5, styles.pb3, styles.flexRow, styles.alignItemsCenter]}>
+                {canSelectMultiple && (
+                    <Checkbox
+                        accessibilityLabel={translate('workspace.people.selectAll')}
+                        isChecked={isSelectAllChecked}
+                        isIndeterminate={isSelectAllIndeterminate}
+                        onPress={toggleAllTransactions}
+                        disabled={totalItems === 0 || !hasLoadedAllTransactions}
+                    />
+                )}
+                {shouldShowTableHeader && (
+                    <View style={[!isTask && styles.pr8, styles.flex1]}>
+                        <SearchTableHeader
+                            canSelectMultiple={canSelectMultiple}
+                            columns={columnsToShow}
+                            type={type}
+                            onSortPress={onSortPress}
+                            sortOrder={sortOrder}
+                            sortBy={sortBy}
+                            shouldShowYear={shouldShowYearCreated}
+                            shouldShowYearSubmitted={shouldShowYearSubmitted}
+                            shouldShowYearApproved={shouldShowYearApproved}
+                            shouldShowYearPosted={shouldShowYearPosted}
+                            shouldShowYearExported={shouldShowYearExported}
+                            isAmountColumnWide={shouldShowAmountInWideColumn}
+                            isTaxAmountColumnWide={shouldShowTaxAmountInWideColumn}
+                            shouldShowSorting
+                            groupBy={validGroupBy}
+                        />
+                    </View>
+                )}
+                {selectAllButtonVisible && (
+                    <PressableWithFeedback
+                        style={[styles.userSelectNone, styles.flexRow, styles.alignItemsCenter]}
+                        onPress={toggleAllTransactions}
+                        accessibilityLabel={translate('workspace.people.selectAll')}
+                        role="button"
+                        accessibilityState={{checked: isSelectAllChecked}}
+                        dataSet={{[CONST.SELECTION_SCRAPER_HIDDEN_ELEMENT]: true}}
+                    >
+                        <Text style={[styles.textStrong, styles.ph3]}>{translate('workspace.people.selectAll')}</Text>
+                    </PressableWithFeedback>
+                )}
+            </View>
+        );
+
+    const listWithOptionalHeader = (
+        <>
+            {headerRow}
+            {searchListContent}
+        </>
+    );
+
     return (
         <SearchScopeProvider>
             <Animated.View style={[styles.flex1, animatedStyle]}>
-                <SearchList
-                    ref={searchListRef}
-                    data={sortedData}
-                    ListItem={ListItem}
-                    onSelectRow={onSelectRow}
-                    onCheckboxPress={toggleTransaction}
-                    onAllCheckboxPress={toggleAllTransactions}
-                    canSelectMultiple={canSelectMultiple}
-                    selectedTransactions={selectedTransactions}
-                    shouldPreventLongPressRow={isChat || isTask}
-                    onDEWModalOpen={handleDEWModalOpen}
-                    isDEWBetaEnabled={isDEWBetaEnabled}
-                    SearchTableHeader={
-                        !shouldShowTableHeader ? undefined : (
-                            <View style={[!isTask && styles.pr8, styles.flex1]}>
-                                <SearchTableHeader
-                                    canSelectMultiple={canSelectMultiple}
-                                    columns={columnsToShow}
-                                    type={type}
-                                    onSortPress={onSortPress}
-                                    sortOrder={sortOrder}
-                                    sortBy={sortBy}
-                                    shouldShowYear={shouldShowYearCreated}
-                                    shouldShowYearSubmitted={shouldShowYearSubmitted}
-                                    shouldShowYearApproved={shouldShowYearApproved}
-                                    shouldShowYearPosted={shouldShowYearPosted}
-                                    shouldShowYearExported={shouldShowYearExported}
-                                    isAmountColumnWide={shouldShowAmountInWideColumn}
-                                    isTaxAmountColumnWide={shouldShowTaxAmountInWideColumn}
-                                    shouldShowSorting
-                                    groupBy={validGroupBy}
-                                />
-                            </View>
-                        )
-                    }
-                    contentContainerStyle={[styles.pb3, contentContainerStyle]}
-                    containerStyle={[styles.pv0, !tableHeaderVisible && !isSmallScreenWidth && styles.pt3]}
-                    shouldPreventDefaultFocusOnSelectRow={!canUseTouchScreen()}
-                    onScroll={onSearchListScroll}
-                    onEndReachedThreshold={0.75}
-                    onEndReached={fetchMoreResults}
-                    ListFooterComponent={
-                        shouldShowLoadingMoreItems ? (
-                            <SearchRowSkeleton
-                                shouldAnimate
-                                fixedNumItems={5}
-                            />
-                        ) : undefined
-                    }
-                    queryJSON={queryJSON}
-                    columns={columnsToShow}
-                    violations={violations}
-                    onLayout={onLayout}
-                    isMobileSelectionModeEnabled={isMobileSelectionModeEnabled}
-                    shouldAnimate={type === CONST.SEARCH.DATA_TYPES.EXPENSE}
-                    newTransactions={newTransactions}
-                    hasLoadedAllTransactions={hasLoadedAllTransactions}
-                    customCardNames={customCardNames}
-                />
+                {shouldScrollHorizontally ? (
+                    <ScrollView
+                        ref={horizontalScrollViewRef}
+                        horizontal
+                        showsHorizontalScrollIndicator
+                        style={styles.flex1}
+                        contentContainerStyle={{width: minTableWidth}}
+                        contentOffset={{x: savedHorizontalScrollOffset, y: 0}}
+                        onScroll={handleHorizontalScroll}
+                        scrollEventThrottle={16}
+                    >
+                        <View style={[styles.flex1, {width: minTableWidth}]}>
+                            {listWithOptionalHeader}
+                        </View>
+                    </ScrollView>
+                ) : (
+                    listWithOptionalHeader
+                )}
             </Animated.View>
         </SearchScopeProvider>
     );
