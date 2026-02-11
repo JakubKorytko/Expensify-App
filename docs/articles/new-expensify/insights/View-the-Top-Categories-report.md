@@ -74,16 +74,21 @@ To create and save a custom report:
 
 ---
 
-## How to switch the Top Categories report to table view
+## How to switch views in the Top Categories report
 
-By default, the Top Categories report displays a bar chart. The table view shows expense categories sorted in descending order by total spend.
+By default, the Top Catgegoried report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
+
+- **Bar** shows merchant totals visually for quick comparison.
+- **Line** shows spending trends over time.
+- **Table** displays merchants in rows sorted by total spend.
 
 To change the view:
 
-1. Click **View** in the top navigation tabs.
-2. Select **Table**.
+1. Open the Top Categories report.
+2. Click **View** in the top navigation.
+3. Select **Bar**, **Line**, or **Table**.
 
-The table view shows expense categories as rows sorted in descending order by total spend.
+The report will update instantly to reflect your selected view.
 
 ---
 
