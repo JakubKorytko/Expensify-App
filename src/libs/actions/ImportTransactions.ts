@@ -214,7 +214,7 @@ function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, c
         offset: 0,
         dateFormat: null,
         accountDetails: {
-            bank: 'upload',
+            bank: CONST.PERSONAL_CARD.BANK_NAME.CSV,
             currency,
             accountID: cardName,
         },

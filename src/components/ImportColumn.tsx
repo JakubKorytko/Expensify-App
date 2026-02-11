@@ -167,7 +167,7 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const columnValuesString = column.slice(containsHeader ? 1 : 0).join(', ');
 
     const currentColumnValue = spreadsheet?.columns?.[columnIndex];
-    const autoDetectedColName = findColumnName(column.at(0) ?? '');
+    const autoDetectedColName = currentColumnValue ? '' : findColumnName(column.at(0) ?? '');
 
     // Selected index: prefer Onyx value, fall back to auto-detected, default to 0
     const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue ?? autoDetectedColName)) ?? -1;
