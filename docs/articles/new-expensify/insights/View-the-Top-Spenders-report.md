@@ -81,6 +81,24 @@ Workspace Admins and finance teams use the Top Spenders report to:
 
 ---
 
+## How to switch views in the Top Spenders report
+
+By default, the Top Spenders report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
+
+- **Bar** shows merchant totals visually for quick comparison.
+- **Line** shows spending trends over time.
+- **Table** displays merchants in rows sorted by total spend.
+
+To change the view:
+
+1. Open the Top Spenders report.
+2. Click **View** in the top navigation.
+3. Select **Bar**, **Line**, or **Table**.
+
+The report will update instantly to reflect your selected view.
+
+---
+
 # FAQ
 
 ## Can you export the Top Spenders report?
