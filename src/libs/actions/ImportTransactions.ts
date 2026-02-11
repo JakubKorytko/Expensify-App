@@ -12,6 +12,7 @@ import ONYXKEYS from '@src/ONYXKEYS';
 import type {Card, CardList} from '@src/types/onyx';
 import type ImportedSpreadsheet from '@src/types/onyx/ImportedSpreadsheet';
 import type {ImportTransactionSettings} from '@src/types/onyx/ImportedSpreadsheet';
+import type {SavedCSVColumnLayoutData} from '@src/types/onyx/SavedCSVColumnLayout';
 import type Transaction from '@src/types/onyx/Transaction';
 
 type TransactionFromCSV = {
@@ -127,58 +128,21 @@ function getColumnIndexes(columns: Record<number, string> | undefined): ColumnIn
     return indexes;
 }
 
-type ColumnLayoutIndexes = {
-    date?: number | boolean;
-    merchant?: number | boolean;
-    amount?: number | boolean;
-    category?: number | boolean;
-    ignore?: number | boolean;
-    type?: number | boolean;
-};
-
-type ColumnLayoutNames = {
-    date?: string | boolean;
-    merchant?: string | boolean;
-    amount?: string | boolean;
-    category?: string | boolean;
-    ignore?: string | boolean;
-    type?: string | boolean;
-};
-
-type ColumnLayout = {
-    name: string;
-    useTypeColumn: boolean;
-    flipAmountSign: boolean;
-    reimbursable: boolean;
-    offset: number;
-    dateFormat?: string | null;
-    accountDetails: {
-        bank: string;
-        currency: string;
-        accountID: string;
-        reimbursable?: boolean;
-    };
-    columnMapping: {
-        names: ColumnLayoutNames;
-        indexes: ColumnLayoutIndexes;
-    };
-};
-
 /**
  * Builds the full column layout structure for oldDot compatibility
  */
-function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, currency: string, isReimbursable: boolean, flipAmountSign: boolean): ColumnLayout {
+function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, currency: string, isReimbursable: boolean, flipAmountSign: boolean): SavedCSVColumnLayoutData {
     const {data, columns, containsHeader = true} = spreadsheet;
 
     // Build indexes and names objects (use false for unmapped columns per oldDot convention)
-    const indexes: ColumnLayoutIndexes = {
+    const indexes: SavedCSVColumnLayoutData['columnMapping']['indexes'] = {
         date: false,
         amount: false,
         merchant: false,
         category: false,
         type: false,
     };
-    const names: ColumnLayoutNames = {
+    const names: SavedCSVColumnLayoutData['columnMapping']['names'] = {
         date: false,
         amount: false,
         merchant: false,
