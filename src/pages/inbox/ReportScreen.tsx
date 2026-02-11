@@ -1055,7 +1055,7 @@ function ReportScreen({route, navigation, isInSidePanel = false}: ReportScreenPr
                                 </OfflineWithFeedback>
                                 {!!accountManagerReportID && isConciergeChatReport(report) && isBannerVisible && (
                                     <Banner
-                                        containerStyles={[styles.mh4, styles.mt4, styles.p4, styles.br2]}
+                                        containerStyles={[styles.mh4, styles.mt4, styles.p4, styles.br2, styles.breakWord]}
                                         text={chatWithAccountManagerText}
                                         onClose={dismissBanner}
                                         onButtonPress={chatWithAccountManager}
