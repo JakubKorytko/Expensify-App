@@ -374,22 +374,6 @@ function ReportScreen({route, navigation, isInSidePanel = false}: ReportScreenPr
     const {closeSidePanel} = useSidePanelActions();
 
     useEffect(() => {
-        if (
-            !isFocused ||
-            !reportIDFromRoute ||
-            report?.reportID ||
-            reportMetadata?.isLoadingInitialReportActions ||
-            reportMetadata?.isOptimisticReport ||
-            isLoadingApp ||
-            userLeavingStatus
-        ) {
-            return;
-        }
-
-        Navigation.goBack();
-    }, [isFocused, reportIDFromRoute, report?.reportID, reportMetadata?.isLoadingInitialReportActions, reportMetadata?.isOptimisticReport, isLoadingApp, userLeavingStatus]);
-
-    useEffect(() => {
         if (!prevIsFocused || isFocused) {
             return;
         }
@@ -417,10 +401,6 @@ function ReportScreen({route, navigation, isInSidePanel = false}: ReportScreenPr
             }
             if (backTo) {
                 Navigation.goBack(backTo as Route);
-                return;
-            }
-            if (Navigation.getShouldPopToSidebar()) {
-                Navigation.popToSidebar();
                 return;
             }
             Navigation.goBack();
@@ -604,7 +584,7 @@ function ReportScreen({route, navigation, isInSidePanel = false}: ReportScreenPr
             }
         }
 
-        openReport(reportIDFromRoute, reportActionIDFromRoute);
+        openReport(reportIDFromRoute, introSelected, reportActionIDFromRoute);
     }, [
         reportMetadata.isOptimisticReport,
         report,
@@ -739,7 +719,7 @@ function ReportScreen({route, navigation, isInSidePanel = false}: ReportScreenPr
         if (!shouldUseNarrowLayout || !isFocused || prevIsFocused || !isChatThread(report) || !isHiddenForCurrentUser(report) || isTransactionThreadView) {
             return;
         }
-        openReport(reportID);
+        openReport(reportID, introSelected);
 
         // We don't want to run this useEffect every time `report` is changed
         // Excluding shouldUseNarrowLayout from the dependency list to prevent re-triggering on screen resize events.
