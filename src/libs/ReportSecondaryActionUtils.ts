@@ -105,6 +105,7 @@ function isSplitAction(
 
     const reportTransaction = reportTransactions.at(0);
 
+    // We disable odometer expense splits
     if (isOdometerDistanceRequest(reportTransaction)) {
         return false;
     }
