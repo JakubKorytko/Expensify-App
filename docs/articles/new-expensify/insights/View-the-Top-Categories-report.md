@@ -76,7 +76,7 @@ To create and save a custom report:
 
 ## How to switch views in the Top Categories report
 
-By default, the Top Catgegoried report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
+By default, the Top Categories report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
 
 - **Bar** shows merchant totals visually for quick comparison.
 - **Line** shows spending trends over time.
