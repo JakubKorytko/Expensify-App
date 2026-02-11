@@ -36,7 +36,6 @@ function TransactionsImportedPage({route}: TransactionsImportedPageProps) {
 
     const columnNames = generateColumnNames(spreadsheet?.data?.length ?? 0);
 
-    // Apply saved column mappings when importing to an existing card
     useEffect(() => {
         if (hasAppliedSavedMappings.current) {
             return;
@@ -46,10 +45,7 @@ function TransactionsImportedPage({route}: TransactionsImportedPageProps) {
             return;
         }
 
-        // Ensure cardID is a string for lookup (route params are strings)
-        const cardIDKey = String(existingCardID);
-        const savedLayout = savedColumnLayouts[cardIDKey];
-
+        const savedLayout = savedColumnLayouts[String(existingCardID)];
         if (!savedLayout) {
             return;
         }
