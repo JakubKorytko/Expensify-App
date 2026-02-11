@@ -112,10 +112,11 @@ function setImportTransactionSettings(cardDisplayName: string, currency: string,
  * @param savedLayout - The saved column layout for this card
  */
 function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: SavedCSVColumnLayoutData): void {
-    if (!savedLayout?.columnMapping?.names) {
+    const columnMapping = savedLayout?.columnMapping;
+    if (!columnMapping?.names) {
         return;
     }
-    const savedNames: SavedCSVColumnLayoutData['columnMapping']['names'] = savedLayout.columnMapping.names;
+    const savedNames = columnMapping.names;
 
     // Build a map of column header names to column indexes (trimmed for comparison)
     const headerToIndex: Record<string, number> = {};
