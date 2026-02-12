@@ -91,25 +91,31 @@ Each Insight is powered by Expensify's search query engine using grouping filter
 
 ## How to switch between views in Insights
 
-Insights support three viewing modes:
+Insights support four viewing modes:
 
 **Bar View**
 
-Displays grouped results as a bar chart. This is the default view and makes comparisons easy at a glance.
+Displays grouped results as a bar chart. This is the default view for **Top categories** and makes comparisons easy at a glance.
 
 **Table View**
 
-Displays grouped data in rows and columns for more detailed analysis.
+Displays grouped data in rows and columns for more detailed analysis. This is the default view for **Top spenders** and simplifies side-by-side comparisons. 
 
 **Line View**
 
-Displays grouped data in a line chart for analyzing trends. 
+Displays grouped data in a line chart for analyzing trends. This is the default view for **Spend over time** and helps you monitor changes and patterns.
+
+**Pie view**
+
+Displays grouped data as a pie chart to show proportional distribution. This is the default for **Top merchants** and helps you understand distribution instantly.
+
+---
 
 To switch views:
 
 1. Open any Insight.
 2. Click **View** in the top navigation.
-3. Select **Table**, **Bar** or **Line**. 
+3. Select **Table**, **Bar**, **Line** or **Pie**.
 
 ---
 
@@ -196,5 +202,4 @@ Common filters include:
 - `date:this-month`
 - `date:last-month`
 - `date:year-to-date`
-- `date:this-quarter`
 - Custom date ranges
