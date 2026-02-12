@@ -5,7 +5,7 @@
 - Reason:
 
     ```
-    Fixes two Temporal Dead Zone (TDZ) crashes in v2.6.4:
+    Fixes TDZ crashes and reorders forward-referenced declarations in v2.6.4:
 
     1. `useRef(_request)` on line 161 references `_request` before its `const`
        declaration on line 466, causing
@@ -20,6 +20,13 @@
        causing `ReferenceError: Cannot access '_disableRowLoaders' before
        initialization`. Fix: move `_disableRowLoaders` above
        `_requestNearby` so it is defined before first use.
+
+    3. Several functions were declared after their callers, creating forward
+       references. While these only execute lazily (not during render), they
+       are reordered for clarity and consistency:
+       - `_renderDescription`, `hideListView`, `isNewFocusInAutocompleteResultList`,
+         `_onBlur`, `_onFocus` moved before `_onPress` (which calls them).
+       - `debounceData` moved before `_onChangeText` (which calls it).
     ```
 
 - Upstream PR/issue: 🛑, library is unmaintained (https://github.com/FaridSafi/react-native-google-places-autocomplete/issues/978)

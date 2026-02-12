@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js b/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
-index 9fedd7e..a1b2c3d 100644
+index 9fedd7e..b3c4d5e 100644
 --- a/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
 +++ b/node_modules/react-native-google-places-autocomplete/GooglePlacesAutocomplete.js
-@@ -158,7 +158,7 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
+@@ -158,7 +158,7 @@
    const prevQueryStringRef = useRef(JSON.stringify(query));
 
    // Store latest _request function - ensures debounced function always calls current version with latest closures
@@ -11,7 +11,7 @@ index 9fedd7e..a1b2c3d 100644
    const queryString = useMemo(() => JSON.stringify(query), [query]);
 
    const [stateText, setStateText] = useState('');
-@@ -347,6 +347,16 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
+@@ -347,6 +347,16 @@
      return rowData;
    };
 
@@ -28,7 +28,7 @@ index 9fedd7e..a1b2c3d 100644
    // ==========================================================================
    // API REQUEST FUNCTIONS
    // ==========================================================================
-@@ -649,16 +659,6 @@ export const GooglePlacesAutocomplete = forwardRef((props, ref) => {
+@@ -650,15 +660,51 @@
      }
    };
 
@@ -36,12 +36,134 @@ index 9fedd7e..a1b2c3d 100644
 -    for (let i = 0; i < resultsRef.current.length; i++) {
 -      if (resultsRef.current[i].isLoading === true) {
 -        resultsRef.current[i].isLoading = false;
--      }
--    }
--
++  const _renderDescription = (rowData) => {
++    if (props.renderDescription) {
++      return props.renderDescription(rowData);
++    }
++
++    return rowData.description || rowData.formatted_address || rowData.name;
++  };
++
++  const hideListView = useCallback(
++    (force = false) => {
++      if (!keepResultsAfterBlur || force) {
++        setListWasDismissed(true);
++        setListViewDisplayed(false);
+       }
++    },
++    [keepResultsAfterBlur],
++  );
++
++  const isNewFocusInAutocompleteResultList = ({
++    relatedTarget,
++    currentTarget,
++  }) => {
++    if (!relatedTarget) return false;
++
++    let node = relatedTarget.parentNode;
++
++    while (node) {
++      if (node.id === 'result-list-id') return true;
++      node = node.parentNode;
+     }
+
 -    setDataSource(buildRowsFromResults(resultsRef.current));
 -  }, [buildRowsFromResults]);
--
++    return false;
++  };
++
++  const _onBlur = (e) => {
++    if (e && isNewFocusInAutocompleteResultList(e)) return;
++
++    hideListView();
++    inputRef?.current?.blur();
++  };
++
++  const _onFocus = () => {
++    setListWasDismissed(false);
++    setListViewDisplayed(true);
++  };
+
    const _onPress = (rowData) => {
      if (rowData.isPredefinedPlace !== true && fetchDetails === true) {
-       if (rowData.isLoading === true) {
+@@ -776,6 +822,11 @@
+     }
+   };
+
++  // Debounce setup
++  const debounceData = useMemo(() => {
++    return debounce((text) => requestRef.current(text), debounceMs);
++  }, [debounceMs]);
++
+   const _onChangeText = (text) => {
+     setListWasDismissed(false);
+     setStateText(text);
+@@ -792,56 +843,10 @@
+     }
+   };
+
+-  const hideListView = useCallback(
+-    (force = false) => {
+-      if (!keepResultsAfterBlur || force) {
+-        setListWasDismissed(true);
+-        setListViewDisplayed(false);
+-      }
+-    },
+-    [keepResultsAfterBlur],
+-  );
+-
+-  const isNewFocusInAutocompleteResultList = ({
+-    relatedTarget,
+-    currentTarget,
+-  }) => {
+-    if (!relatedTarget) return false;
+-
+-    let node = relatedTarget.parentNode;
+-
+-    while (node) {
+-      if (node.id === 'result-list-id') return true;
+-      node = node.parentNode;
+-    }
+-
+-    return false;
+-  };
+-
+-  const _onBlur = (e) => {
+-    if (e && isNewFocusInAutocompleteResultList(e)) return;
+-
+-    hideListView();
+-    inputRef?.current?.blur();
+-  };
+-
+-  const _onFocus = () => {
+-    setListWasDismissed(false);
+-    setListViewDisplayed(true);
+-  };
+-
+   // ==========================================================================
+   // RENDER FUNCTIONS
+   // ==========================================================================
+
+-  const _renderDescription = (rowData) => {
+-    if (props.renderDescription) {
+-      return props.renderDescription(rowData);
+-    }
+-
+-    return rowData.description || rowData.formatted_address || rowData.name;
+-  };
+-
+   const _getRowLoader = () => {
+     return <ActivityIndicator animating={true} size='small' />;
+   };
+@@ -1078,11 +1083,6 @@
+   // Keep requestRef updated
+   requestRef.current = _request;
+
+-  // Debounce setup
+-  const debounceData = useMemo(() => {
+-    return debounce((text) => requestRef.current(text), debounceMs);
+-  }, [debounceMs]);
+-
+   useEffect(() => {
+     return () => {
+       // Cleanup debounced function on unmount
