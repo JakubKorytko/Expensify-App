@@ -5,11 +5,21 @@
 - Reason:
 
     ```
-    Fixes a Temporal Dead Zone (TDZ) crash: `useRef(_request)` on line 161 references
-    `_request` before its `const` declaration on line 466, causing
-    `ReferenceError: Cannot access '_request' before initialization`.
-    Replacing the initial value with `null` is safe because `requestRef.current`
-    is reassigned to `_request` on every render (line 1079) before it can be invoked.
+    Fixes two Temporal Dead Zone (TDZ) crashes in v2.6.4:
+
+    1. `useRef(_request)` on line 161 references `_request` before its `const`
+       declaration on line 466, causing
+       `ReferenceError: Cannot access '_request' before initialization`.
+       Fix: replace the initial value with `null` (safe because
+       `requestRef.current` is reassigned to `_request` every render before
+       it can be invoked).
+
+    2. `_disableRowLoaders` (a `const useCallback`) was declared on line 653
+       but referenced in the `useCallback` dependency arrays of
+       `_requestNearby` (line 450) and `getCurrentLocation` (line 629),
+       causing `ReferenceError: Cannot access '_disableRowLoaders' before
+       initialization`. Fix: move `_disableRowLoaders` above
+       `_requestNearby` so it is defined before first use.
     ```
 
 - Upstream PR/issue: 🛑, library is unmaintained (https://github.com/FaridSafi/react-native-google-places-autocomplete/issues/978)
