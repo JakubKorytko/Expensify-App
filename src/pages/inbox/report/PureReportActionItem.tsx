@@ -447,6 +447,7 @@ type PureReportActionItemProps = {
         reportID: string | undefined,
         reportAction: OnyxTypes.ReportAction | null | undefined,
         originalReportID: string | undefined,
+        allReportActionsParam: OnyxCollection<OnyxTypes.ReportActions>,
         ignore?: IgnoreDirection,
         keys?: string[],
     ) => void;
@@ -629,13 +630,13 @@ function PureReportActionItem({
         const originalReportID = getOriginalReportID(reportID, action, reportActions);
         if (isSendingMoney && transactionID && reportID) {
             const chatReport = allReports?.[`${ONYXKEYS.COLLECTION.REPORT}${report?.chatReportID}`];
-            cleanUpMoneyRequest(transactionID, action, reportID, report, chatReport, undefined, originalReportID, true);
+            cleanUpMoneyRequest(transactionID, action, reportID, report, chatReport, undefined, originalReportID, allReportActions, true);
             return;
         }
         if (transactionID) {
             clearError(transactionID);
         }
-        clearAllRelatedReportActionErrors(reportID, action, originalReportID);
+        clearAllRelatedReportActionErrors(reportID, action, originalReportID, allReportActions);
     }, [action, isSendingMoney, clearAllRelatedReportActionErrors, reportID, allReports, allReportActions, report, clearError]);
 
     const showDismissReceiptErrorModal = useCallback(async () => {

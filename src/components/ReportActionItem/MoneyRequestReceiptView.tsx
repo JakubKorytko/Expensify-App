@@ -241,6 +241,7 @@ function MoneyRequestReceiptView({
                     chatIOUReport,
                     isChatIOUReportArchived,
                     originalReportID,
+                    allReportActions,
                     true,
                 );
                 return;
@@ -251,7 +252,7 @@ function MoneyRequestReceiptView({
                 return;
             }
             clearError(linkedTransactionID);
-            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID);
+            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID, allReportActions);
             return;
         }
         if (!isEmptyObject(transactionAndReportActionErrors)) {
@@ -259,7 +260,7 @@ function MoneyRequestReceiptView({
         }
         if (!isEmptyObject(errorsWithoutReportCreation)) {
             clearError(transaction.transactionID);
-            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID);
+            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID, allReportActions);
         }
         if (!isEmptyObject(reportCreationError)) {
             if (isInNarrowPaneModal) {
