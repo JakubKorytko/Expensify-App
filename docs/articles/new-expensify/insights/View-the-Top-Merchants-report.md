@@ -77,11 +77,11 @@ To create and save a custom report:
 
 ## How to switch views in the Top Merchants report
 
-By default, the Top Merchants report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
+By default, the Top Merchants report displays a **Pie** chart. You can also switch to **Table**, **Bar** or **Line** view depending on how you want to analyze your data.
 
+- **Table** displays merchants in rows sorted by total spend.
 - **Bar** shows merchant totals visually for quick comparison.
 - **Line** shows spending trends over time.
-- **Table** displays merchants in rows sorted by total spend.
 
 To change the view:
 
