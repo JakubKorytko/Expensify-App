@@ -16,8 +16,6 @@ The **Top Merchants** report shows which merchants or vendors received the highe
 
 This report is a pre-built suggested search that uses filters to group your expenses by merchant.
 
-![Top Merchants bar chart]({{site.url}}/assets/images/top-merchants.png){:width="100%"}
-
 ---
 
 ## Who can use the Top Merchants report
@@ -87,7 +85,7 @@ To change the view:
 
 1. Open the Top Merchants report.
 2. Click **View** in the top navigation.
-3. Select **Bar**, **Line**, or **Table**.
+3. Select **Table**, **Bar**, or **Line**.
 
 The report will update instantly to reflect your selected view.
 
@@ -121,9 +119,9 @@ To export expenses:
 
 Each report provides a different view of your spending:
 
-- **Top Merchants** shows which **vendors** received the most payments
-- **Top Categories** shows the highest-spending **expense types** (e.g., Travel, Meals)
-- **Top Spenders** shows which **employees** submitted the most expenses
+- **Spend over time** shows how total expenses change over a date range.
+- **Top Categories** shows the highest-spending expense types (e.g., Travel, Meals).
+- **Top Spenders** shows which members submitted the most expenses.
 
 All reports help identify trends from different perspectives to support better financial decisions.
 
