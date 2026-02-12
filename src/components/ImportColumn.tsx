@@ -167,13 +167,15 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const columnValuesString = column.slice(containsHeader ? 1 : 0).join(', ');
 
     const currentColumnValue = spreadsheet?.columns?.[columnIndex];
-    const autoDetectedColName = currentColumnValue ? '' : findColumnName(column.at(0) ?? '');
+    // Treat 'ignore' as unmapped so auto-detection can still run
+    const isMapped = currentColumnValue && currentColumnValue !== CONST.CSV_IMPORT_COLUMNS.IGNORE;
+    const autoDetectedColName = isMapped ? '' : findColumnName(column.at(0) ?? '');
 
     const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue ?? autoDetectedColName)) ?? -1;
     const selectedIndex = foundIndex !== -1 ? foundIndex : 0;
 
     useEffect(() => {
-        if (currentColumnValue || !autoDetectedColName) {
+        if (isMapped || !autoDetectedColName) {
             return;
         }
         setColumnName(columnIndex, autoDetectedColName);
