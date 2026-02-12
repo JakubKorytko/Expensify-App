@@ -118,7 +118,6 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
     }
     const savedNames = columnMapping.names;
 
-    // Build a map of column header names to column indexes (trimmed for comparison)
     const headerToIndex: Record<string, number> = {};
     for (const [index, column] of spreadsheetData.entries()) {
         const headerName = column.at(0)?.trim();
@@ -127,13 +126,11 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
         }
     }
 
-    // For each saved role -> column name mapping, find the matching column index
     const columnUpdates: Record<number, string> = {};
     const roles = ['date', 'merchant', 'amount', 'category'] as const;
 
     for (const role of roles) {
         const savedColumnName = savedNames[role];
-        // Skip if the value is false (not mapped) or not a string
         if (typeof savedColumnName !== 'string') {
             continue;
         }
@@ -143,7 +140,6 @@ function applySavedColumnMappings(spreadsheetData: string[][], savedLayout: Save
         }
     }
 
-    // If we found any matching columns, apply the mappings
     if (Object.keys(columnUpdates).length > 0) {
         Onyx.merge(ONYXKEYS.IMPORTED_SPREADSHEET, {columns: columnUpdates});
     }

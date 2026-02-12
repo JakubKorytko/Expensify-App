@@ -169,17 +169,14 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const currentColumnValue = spreadsheet?.columns?.[columnIndex];
     const autoDetectedColName = currentColumnValue ? '' : findColumnName(column.at(0) ?? '');
 
-    // Selected index: prefer Onyx value, fall back to auto-detected, default to 0
     const foundIndex = columnRoles?.findIndex((item) => item.value === (currentColumnValue ?? autoDetectedColName)) ?? -1;
     const selectedIndex = foundIndex !== -1 ? foundIndex : 0;
 
     useEffect(() => {
-        // Auto-detect column name on mount, but only if no value is already set
         if (currentColumnValue || !autoDetectedColName) {
             return;
         }
         setColumnName(columnIndex, autoDetectedColName);
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want this effect to run again
     }, []);
 
     const columnHeader = containsHeader ? column.at(0) : translate('spreadsheet.column', columnName);

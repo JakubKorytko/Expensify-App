@@ -134,7 +134,6 @@ function getColumnIndexes(columns: Record<number, string> | undefined): ColumnIn
 function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, currency: string, isReimbursable: boolean, flipAmountSign: boolean): SavedCSVColumnLayoutData {
     const {data, columns, containsHeader = true} = spreadsheet;
 
-    // Build indexes and names objects (use false for unmapped columns per oldDot convention)
     const indexes: SavedCSVColumnLayoutData['columnMapping']['indexes'] = {
         date: false,
         amount: false,
@@ -154,10 +153,8 @@ function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, c
         for (const [indexStr, role] of Object.entries(columns)) {
             if (role === 'date' || role === 'merchant' || role === 'amount' || role === 'category') {
                 const colIndex = Number(indexStr);
-                // OldDot expects indexes as numbers, not strings
                 indexes[role] = colIndex;
 
-                // Get the header name for this column
                 if (containsHeader && data && colIndex >= 0 && colIndex < data.length) {
                     const headerName = data.at(colIndex)?.at(0);
                     if (headerName) {
@@ -169,12 +166,10 @@ function buildColumnLayout(spreadsheet: ImportedSpreadsheet, cardName: string, c
     }
 
     return {
-        name: 'Default',
+        name: cardName,
         useTypeColumn: false,
         flipAmountSign,
         reimbursable: isReimbursable,
-        // In oldDot, offset is the row index of the header row (0 = header at row 0)
-        // not the number of rows to skip
         offset: 0,
         dateFormat: null,
         accountDetails: {
