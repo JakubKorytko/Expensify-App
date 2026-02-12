@@ -8,7 +8,7 @@ getting-started:
   - title: For employees
     icon: /assets/images/simple-illustration__approval-members.svg
     description: Join a workspace, submit expenses and enable 2FA.
-    href: /articles/new-expensify/getting-started/Join-your-company's-workspace
+    href: /articles/new-expensify/getting-started/Join-your-companys-workspace
 
   - title: For admins
     icon: /assets/images/simple-illustration__company-share-alt.svg
