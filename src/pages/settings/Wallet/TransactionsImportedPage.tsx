@@ -31,12 +31,19 @@ function TransactionsImportedPage({route}: TransactionsImportedPageProps) {
     const [isImporting, setIsImporting] = useState(false);
     const [isValidationEnabled, setIsValidationEnabled] = useState(false);
     const hasAppliedSavedMappings = useRef(false);
+    const lastProcessedDataRef = useRef(spreadsheet?.data);
 
     const {setIsClosing} = useCloseImportPage();
 
     const columnNames = generateColumnNames(spreadsheet?.data?.length ?? 0);
 
     useEffect(() => {
+        // Reset the flag when new spreadsheet data is loaded
+        if (spreadsheet?.data !== lastProcessedDataRef.current) {
+            hasAppliedSavedMappings.current = false;
+            lastProcessedDataRef.current = spreadsheet?.data;
+        }
+
         if (hasAppliedSavedMappings.current) {
             return;
         }
