@@ -1,7 +1,7 @@
 ---
 title: View the Top Spenders report
 description: Learn how Workspace Admins, Approvers, and Auditors can use the Top Spenders report to understand spending trends.
-keywords: New Expensify, Top Spenders, employee spending, high spenders, expense trends, Workspace Admin, Approver, Auditor, monthly spending, spending insights, virtual CFO, analytics, insight, budget
+keywords: [New Expensify, Top Spenders, Top Categories, Top Merchants, Spend over time, employee spending, high spenders, expense trends, Workspace Admin, Approver, Auditor, monthly spending, spending insights, virtual CFO, analytics, insight, budget]
 internalScope: Audience is Workspace Admins, Approvers, and Auditors. Covers using the Top Spenders suggested search to view employee-level spending. Does not cover custom reports, exporting data, or grouping by category or merchant.
 ---
 
@@ -111,10 +111,9 @@ Not directly — the Top Spenders report can’t be exported with its grouped to
 
 Additional Insights reports help you analyze spending from different perspectives:
 
-- **Spend over time** - View spending over time. 
-- **Top Spenders** - View spending by workspace member. 
-- **Top Categories** - View spending by expense category
-- **Top Merchants** - View spending by vendor or merchant
+- **Spend over time** shows how total expenses change over a date range.
+- **Top Merchants** shows which vendors received the most payments.
+- **Top Categories** shows the highest-spending expense types (e.g., Travel, Meals).
 
 [Learn more about all available Insights](https://help.expensify.com/articles/new-expensify/insights/Insights-Overview)
 
