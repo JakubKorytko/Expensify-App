@@ -7,7 +7,7 @@ internalScope: Audience is Workspace Admins, Approvers, and Auditors. Covers usi
 
 # View the Top Spenders report
 
-The **Top Spenders** report shows which employees submitted the highest total expenses last month. It’s a fast way to:
+The Top Spenders report shows which employees submitted the highest total expenses last month. It’s a fast way to:
 
 - Identify high or unusual spenders
 - Spot trends without exporting data
@@ -19,7 +19,7 @@ This report is a pre-built suggested search so you can review spending activity 
 
 ## Who can use the Top Spenders report 
 
-The **Top Spenders** report is available to Workspace Admins, Approvers, and Auditors on both web and mobile.
+The Top Spenders report is available to Workspace Admins, Approvers, and Auditors on both web and mobile.
 
 **Note:** Exporting data is only available on web.
 
@@ -32,8 +32,6 @@ Use the navigation tabs on the left and select **Reports**, then click **Top spe
 
 **Mobile:**  
 Tap **Reports** from the navigation tabs on the bottom, then tap the hamburger menu in the top-right corner. Under **Insights**, tap **Top spenders**.
-
-![Top spenders report]({{site.url}}/assets/images/top-spender.png)
 
 ---
 
@@ -59,7 +57,7 @@ Click any row to view that member's individual expenses.
 
 ## Can you customize the Top Spenders report?
 
-Yes - you can adjust filters like date range, workspace, or employee to explore spending trends. However, the **Top Spenders** report is a built-in suggested search, so you can’t save changes to it directly.
+Yes - you can adjust filters like date range, workspace, or employee to explore spending trends. However, the Top Spenders report is a built-in suggested search, so you can’t save changes to it directly.
 
 To create and save a custom report: 
 
@@ -83,17 +81,17 @@ Workspace Admins and finance teams use the Top Spenders report to:
 
 ## How to switch views in the Top Spenders report
 
-By default, the Top Spenders report displays a **Bar** chart. You can also switch to **Line** or **Table** view depending on how you want to analyze your data.
+By default, the Top Spenders report displays a **Table**. You can also switch to **Bar**, **Line** or **Pie** view depending on how you want to analyze your data.
 
-- **Bar** shows merchant totals visually for quick comparison.
-- **Line** shows spending trends over time.
-- **Table** displays merchants in rows sorted by total spend.
+ - **Bar** shows totals for easy comparison.
+ - **Line** shows trends over time.
+ - **Pie** shows how data is distributed.
 
 To change the view:
 
 1. Open the Top Spenders report.
 2. Click **View** in the top navigation.
-3. Select **Bar**, **Line**, or **Table**.
+3. Select **Bar**, **Line**, or **Pie**.
 
 The report will update instantly to reflect your selected view.
 
@@ -113,6 +111,8 @@ Not directly — the Top Spenders report can’t be exported with its grouped to
 
 Additional Insights reports help you analyze spending from different perspectives:
 
+- **Spend over time** - View spending over time. 
+- **Top Spenders** - View spending by workspace member. 
 - **Top Categories** - View spending by expense category
 - **Top Merchants** - View spending by vendor or merchant
 
@@ -120,7 +120,7 @@ Additional Insights reports help you analyze spending from different perspective
 
 ## Can other people see my Top Spenders report?
 
-Only Workspace Admins, Approvers, and Auditors can view a workspace's Top Spenders report. Regular members do not have access.
+Only Workspace Admins, Approvers, and Auditors can view a workspace's **Top Spenders** report. Regular members do not have access.
 
 ## How is the Top Spenders report calculated?
 
