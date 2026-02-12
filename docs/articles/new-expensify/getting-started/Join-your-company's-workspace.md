@@ -25,7 +25,7 @@ Now, check your email inbox for the invite to join your company's workspace. If 
 
 Once you have gained access to Expensify, download the Expensify app:
 
-- **Mobile:** [Android](https://play.google.com/store/apps/details?id=com.expensify.chat) | [iOS](https://apps.apple.com/us/app/expensify-cash/id1530278510)
+- **Mobile:** [Android](https://play.google.com/store/apps/details?id=org.me.mobiexpensifyg) | [iOS](https://apps.apple.com/us/app/expensify-expense-tracker/id471713959)
 
 ---
 
@@ -92,4 +92,3 @@ Add an extra layer of security to protect your account.
 6. Enter the 6-digit code and click **Verify**
 
 ⚠️ **Important:** Keep your backup codes in a safe place! Without them, you could lose access to your account if you can't use your authenticator app.
-
