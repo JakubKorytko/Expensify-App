@@ -48,6 +48,8 @@ function recentWaypointsSelector(waypoints: RecentWaypoint[] = []) {
                 location: {
                     lat: waypoint.lat ?? 0,
                     lng: waypoint.lng ?? 0,
+                    latitude: waypoint.lat ?? 0,
+                    longitude: waypoint.lng ?? 0,
                 },
             },
         }));
