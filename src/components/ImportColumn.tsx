@@ -1,5 +1,5 @@
 import {Str} from 'expensify-common';
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {View} from 'react-native';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
@@ -156,6 +156,7 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const {translate} = useLocalize();
     const [spreadsheet] = useOnyx(ONYXKEYS.IMPORTED_SPREADSHEET, {canBeMissing: true});
     const {containsHeader = true} = spreadsheet ?? {};
+    const hasAutoDetected = useRef(false);
 
     const options: Array<DropdownOption<string>> = (columnRoles ?? []).map((item) => ({
         text: item.text,
@@ -175,11 +176,18 @@ function ImportColumn({column, columnName, columnRoles, columnIndex, shouldShowD
     const selectedIndex = foundIndex !== -1 ? foundIndex : 0;
 
     useEffect(() => {
+        // Only run auto-detection once on mount
+        if (hasAutoDetected.current) {
+            return;
+        }
+
         if (isMapped || !autoDetectedColName) {
             return;
         }
+
+        hasAutoDetected.current = true;
         setColumnName(columnIndex, autoDetectedColName);
-    }, []);
+    }, [isMapped, autoDetectedColName, columnIndex]);
 
     const columnHeader = containsHeader ? column.at(0) : translate('spreadsheet.column', columnName);
 
