@@ -152,6 +152,7 @@ import type Task from './Task';
 import type Transaction from './Transaction';
 import type {TransactionViolation, ViolationName} from './TransactionViolation';
 import type TransactionViolations from './TransactionViolation';
+import type TravelInvoiceStatement from './TravelInvoiceStatement';
 import type TravelProvisioning from './TravelProvisioning';
 import type {TravelSettings, WorkspaceTravelSettings} from './TravelSettings';
 import type TryNewDot from './TryNewDot';
@@ -282,6 +283,7 @@ export type {
     MergeTransaction,
     TransactionViolation,
     TransactionViolations,
+    TravelInvoiceStatement,
     TravelSettings,
     WorkspaceTravelSettings,
     UserLocation,

@@ -1,5 +1,5 @@
-import {format} from 'date-fns';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import {endOfMonth, format, startOfMonth, subMonths} from 'date-fns';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {View} from 'react-native';
 import FullPageOfflineBlockingView from '@components/BlockingViews/FullPageOfflineBlockingView';
 import Button from '@components/Button';
@@ -10,16 +10,23 @@ import ScrollView from '@components/ScrollView';
 import DatePresetFilterBase from '@components/Search/FilterComponents/DatePresetFilterBase';
 import type {SearchDatePresetFilterBaseHandle, SearchDateValues} from '@components/Search/FilterComponents/DatePresetFilterBase';
 import type {SearchDatePreset} from '@components/Search/types';
+import useEnvironment from '@hooks/useEnvironment';
 import useLocalize from '@hooks/useLocalize';
+import useOnyx from '@hooks/useOnyx';
+import usePrevious from '@hooks/usePrevious';
 import useThemeStyles from '@hooks/useThemeStyles';
-import {getTravelInvoiceStatement} from '@libs/actions/TravelInvoicing';
+import {clearTravelInvoiceStatementState, exportTravelInvoiceStatementCSV, generateTravelInvoiceStatementPDF} from '@libs/actions/TravelInvoicing';
+import {getOldDotURLFromEnvironment} from '@libs/Environment/Environment';
+import fileDownload from '@libs/fileDownload';
 import Navigation from '@libs/Navigation/Navigation';
 import type {PlatformStackScreenProps} from '@libs/Navigation/PlatformStackNavigation/types';
 import type {SettingsNavigatorParamList} from '@libs/Navigation/types';
 import {isSearchDatePreset} from '@libs/SearchQueryUtils';
 import {getDateRangeForPreset} from '@libs/SearchUIUtils';
 import type {SearchDateModifier} from '@libs/SearchUIUtils';
+import addTrailingForwardSlash from '@libs/UrlUtils';
 import CONST from '@src/CONST';
+import ONYXKEYS from '@src/ONYXKEYS';
 import type SCREENS from '@src/SCREENS';
 
 type WorkspaceTravelInvoicingExportPageProps = PlatformStackScreenProps<SettingsNavigatorParamList, typeof SCREENS.WORKSPACE.TRAVEL_EXPORT>;
@@ -28,6 +35,15 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
     const {policyID} = route.params;
     const styles = useThemeStyles();
     const {translate} = useLocalize();
+    const {environment} = useEnvironment();
+
+    const [travelInvoiceStatement] = useOnyx(ONYXKEYS.TRAVEL_INVOICE_STATEMENT, {canBeMissing: true});
+    const isGenerating = travelInvoiceStatement?.isGenerating ?? false;
+    const prevIsGenerating = usePrevious(isGenerating);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+
+    const baseURL = addTrailingForwardSlash(getOldDotURLFromEnvironment(environment));
 
     const searchDatePresetFilterBaseRef = useRef<SearchDatePresetFilterBaseHandle>(null);
     const [selectedDateModifier, setSelectedDateModifier] = useState<SearchDateModifier | null>(null);
@@ -82,34 +98,90 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
         searchDatePresetFilterBaseRef.current.clearDateValues();
     }, [selectedDateModifier]);
 
-    const handleDownload = (type: 'csv' | 'pdf') => {
+    /**
+     * Calculate start and end dates from the selected date values.
+     * Returns dates in YYYY-MM-DD format (SQL date format).
+     */
+    const getDateRange = useCallback((): {startDate: string; endDate: string} => {
         const values = searchDatePresetFilterBaseRef.current?.getDateValues();
         const dateOn = values?.[CONST.SEARCH.DATE_MODIFIERS.ON];
         const dateAfter = values?.[CONST.SEARCH.DATE_MODIFIERS.AFTER];
         const dateBefore = values?.[CONST.SEARCH.DATE_MODIFIERS.BEFORE];
 
-        let formattedPeriod = '';
-        if (dateOn) {
-            if (isSearchDatePreset(dateOn)) {
-                const range = getDateRangeForPreset(dateOn);
-                // For presets like "This month", keep yyyyMM
-                formattedPeriod = range.start.replaceAll('-', '').substring(0, 6);
-            } else {
-                // Specific date "On" -> yyyyMMdd
-                formattedPeriod = dateOn.replaceAll('-', '');
-            }
-        } else if (dateAfter || dateBefore) {
-            // Range handling: start-end format with yyyyMMdd
-            const start = dateAfter ? dateAfter.replaceAll('-', '') : '';
-            const end = dateBefore ? dateBefore.replaceAll('-', '') : '';
-            formattedPeriod = `${start}-${end}`;
-        } else {
-            // Default to this month
-            formattedPeriod = format(new Date(), 'yyyyMM');
+        // If a preset is selected (This Month, Last Month)
+        if (dateOn && isSearchDatePreset(dateOn)) {
+            const range = getDateRangeForPreset(dateOn);
+            return {startDate: range.start, endDate: range.end};
         }
 
-        getTravelInvoiceStatement(policyID, formattedPeriod, type, translate);
-    };
+        // If a specific date is selected via "On"
+        if (dateOn) {
+            return {startDate: dateOn, endDate: dateOn};
+        }
+
+        // If a custom range is selected via After/Before
+        if (dateAfter || dateBefore) {
+            const now = new Date();
+            const startDate = dateAfter ?? format(startOfMonth(subMonths(now, 12)), 'yyyy-MM-dd');
+            const endDate = dateBefore ?? format(endOfMonth(now), 'yyyy-MM-dd');
+            return {startDate, endDate};
+        }
+
+        // Default to this month
+        const now = new Date();
+        return {
+            startDate: format(startOfMonth(now), 'yyyy-MM-dd'),
+            endDate: format(endOfMonth(now), 'yyyy-MM-dd'),
+        };
+    }, []);
+
+    /**
+     * Handle PDF download - initiates generation and waits for completion.
+     * This callback is called both on button press and when generation completes.
+     */
+    const processPDFDownload = useCallback(() => {
+        // If isGenerating is stuck from a previous failed request, clear it and proceed
+        if (isGenerating) {
+            clearTravelInvoiceStatementState();
+        }
+
+        const {startDate, endDate} = getDateRange();
+        const statementKey = `${policyID}_${startDate}_${endDate}`;
+
+        setIsDownloading(true);
+
+        // Check if we already have a cached PDF for this date range
+        const existingFilename = travelInvoiceStatement?.[statementKey];
+        if (typeof existingFilename === 'string' && existingFilename) {
+            const downloadFileName = `Travel_Statement_${startDate}_${endDate}.pdf`;
+            const pdfURL = `${baseURL}secure?secureType=pdfreport&filename=${existingFilename}&downloadName=${downloadFileName}`;
+            fileDownload(translate, pdfURL, downloadFileName).finally(() => setIsDownloading(false));
+            return;
+        }
+
+        // Request PDF generation
+        generateTravelInvoiceStatementPDF(policyID, startDate, endDate);
+    }, [baseURL, getDateRange, isGenerating, policyID, translate, travelInvoiceStatement]);
+
+    /**
+     * Handle CSV download - direct download via stream.
+     */
+    const handleCSVDownload = useCallback(() => {
+        const {startDate, endDate} = getDateRange();
+        exportTravelInvoiceStatementCSV(policyID, startDate, endDate, translate);
+    }, [getDateRange, policyID, translate]);
+
+    // eslint-disable-next-line rulesdir/prefer-early-return
+    useEffect(() => {
+        // If the statement generation is complete, download it automatically.
+        if (prevIsGenerating && !isGenerating) {
+            if (travelInvoiceStatement) {
+                processPDFDownload();
+            } else {
+                setIsDownloading(false);
+            }
+        }
+    }, [prevIsGenerating, isGenerating, processPDFDownload, travelInvoiceStatement]);
 
     const computedTitle = getComputedTitle();
 
@@ -141,14 +213,15 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
                         <>
                             <Button
                                 text={translate('workspace.moreFeatures.travel.travelInvoicing.exportToPDF')}
-                                onPress={() => handleDownload('pdf')}
+                                onPress={processPDFDownload}
+                                isLoading={isDownloading}
                                 large
                                 style={styles.mb3}
                             />
                             <Button
                                 success
                                 text={translate('workspace.moreFeatures.travel.travelInvoicing.exportToCSV')}
-                                onPress={() => handleDownload('csv')}
+                                onPress={handleCSVDownload}
                                 large
                             />
                         </>

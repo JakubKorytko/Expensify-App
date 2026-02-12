@@ -3,9 +3,17 @@ import type {OnyxUpdate} from 'react-native-onyx';
 import type {ValueOf} from 'type-fest';
 import type {LocalizedTranslate} from '@components/LocaleContextProvider';
 import * as API from '@libs/API';
-import type {OpenPolicyTravelPageParams, SetTravelInvoicingSettlementAccountParams, ToggleTravelInvoicingParams, UpdateTravelInvoicingSettlementFrequencyParams} from '@libs/API/parameters';
+import type {
+    ExportTravelInvoiceStatementCSVParams,
+    GetTravelInvoiceStatementPDFParams,
+    OpenPolicyTravelPageParams,
+    SetTravelInvoicingSettlementAccountParams,
+    ToggleTravelInvoicingParams,
+    UpdateTravelInvoicingSettlementFrequencyParams,
+} from '@libs/API/parameters';
 import {READ_COMMANDS, WRITE_COMMANDS} from '@libs/API/types';
-import {getCommandURL} from '@libs/ApiUtils';
+import * as ApiUtils from '@libs/ApiUtils';
+import enhanceParameters from '@libs/Network/enhanceParameters';
 import * as ErrorUtils from '@libs/ErrorUtils';
 import fileDownload from '@libs/fileDownload';
 import {getTravelInvoicingCardSettingsKey} from '@libs/TravelInvoicingUtils';
@@ -315,16 +323,69 @@ function clearToggleTravelInvoicingErrors(workspaceAccountID: number) {
 }
 
 /**
- * Downloads the Travel Invoice Statement for a policy and period.
+ * Clears the travel invoice statement state.
+ * Useful for recovering from stuck states.
  */
-function getTravelInvoiceStatement(policyID: string, period: string, type: 'csv' | 'pdf', translate: LocalizedTranslate) {
-    const formData = new FormData();
-    formData.append('policyID', policyID);
-    formData.append('period', period);
-    formData.append('type', type);
+function clearTravelInvoiceStatementState() {
+    Onyx.merge(ONYXKEYS.TRAVEL_INVOICE_STATEMENT, {
+        isGenerating: false,
+    });
+}
 
-    const commandURL = getCommandURL({command: WRITE_COMMANDS.GET_TRAVEL_INVOICING_PAYMENTS});
-    const filename = `Travel_Statement_${period}.${type}`;
+/**
+ * Generates a Travel Invoice Statement PDF for the given policy and date range.
+ * Uses optimistic updates to track generation status in Onyx.
+ */
+function generateTravelInvoiceStatementPDF(policyID: string, startDate: string, endDate: string) {
+    const parameters: GetTravelInvoiceStatementPDFParams = {
+        policyID,
+        startDate,
+        endDate,
+    };
+
+    // Note: Backend returns onyxData with isGenerating: false AND the PDF filename,
+    // so we don't need successData here - the backend response handles it.
+    API.read(READ_COMMANDS.GET_TRAVEL_INVOICE_STATEMENT_PDF, parameters, {
+        optimisticData: [
+            {
+                onyxMethod: Onyx.METHOD.MERGE,
+                key: ONYXKEYS.TRAVEL_INVOICE_STATEMENT,
+                value: {
+                    isGenerating: true,
+                },
+            },
+        ],
+        failureData: [
+            {
+                onyxMethod: Onyx.METHOD.MERGE,
+                key: ONYXKEYS.TRAVEL_INVOICE_STATEMENT,
+                value: {
+                    isGenerating: false,
+                },
+            },
+        ],
+    });
+}
+
+/**
+ * Exports Travel Invoice Statement data as CSV for the given policy and date range.
+ * Downloads the file directly using fileDownload utility.
+ */
+function exportTravelInvoiceStatementCSV(policyID: string, startDate: string, endDate: string, translate: LocalizedTranslate) {
+    const finalParameters = enhanceParameters(READ_COMMANDS.EXPORT_TRAVEL_INVOICE_STATEMENT_CSV, {
+        policyID,
+        startDate,
+        endDate,
+    } as ExportTravelInvoiceStatementCSVParams);
+
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(finalParameters)) {
+        formData.append(key, String(value));
+    }
+
+    const filename = `Travel_Statement_${startDate}_${endDate}.csv`;
+    const commandURL = ApiUtils.getCommandURL({command: READ_COMMANDS.EXPORT_TRAVEL_INVOICE_STATEMENT_CSV});
+
     fileDownload(translate, commandURL, filename, '', false, formData, CONST.NETWORK.METHOD.POST);
 }
 
@@ -336,5 +397,7 @@ export {
     updateTravelInvoiceSettlementFrequency,
     toggleTravelInvoicing,
     clearToggleTravelInvoicingErrors,
-    getTravelInvoiceStatement,
+    clearTravelInvoiceStatementState,
+    generateTravelInvoiceStatementPDF,
+    exportTravelInvoiceStatementCSV,
 };
