@@ -67,10 +67,6 @@ type:expense merchant:Starbucks category:Meals amount>20 has:receipt
 
 ## Available filters for Reports
 
-```
-type:expense-report status:paid exported:never
-```
-
 - `report-id:` – unique report reference
 - `status:` – draft, outstanding, approved, paid, done
 - `submitted:` / `approved:` / `paid:` / `exported:` – supports absolute or relative dates
