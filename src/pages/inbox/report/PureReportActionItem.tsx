@@ -200,6 +200,7 @@ import {
     getDisplayNamesWithTooltips,
     getMovedActionMessage,
     getMovedTransactionMessage,
+    getOriginalReportID,
     getPolicyChangeMessage,
     getUnreportedTransactionMessage,
     getWhisperDisplayNames,
@@ -258,6 +259,9 @@ import TripSummary from './TripSummary';
 type PureReportActionItemProps = {
     /** All the data of the report collection */
     allReports: OnyxCollection<OnyxTypes.Report>;
+
+    /** All the data of the report actions collection */
+    allReportActions?: OnyxCollection<OnyxTypes.ReportActions>;
 
     /** All the data of the policy collection */
     policies: OnyxCollection<OnyxTypes.Policy>;
@@ -439,7 +443,13 @@ type PureReportActionItemProps = {
     clearError?: (transactionID: string) => void;
 
     /** Function to clear all errors from a report action */
-    clearAllRelatedReportActionErrors?: (reportID: string | undefined, reportAction: OnyxTypes.ReportAction | null | undefined, ignore?: IgnoreDirection, keys?: string[]) => void;
+    clearAllRelatedReportActionErrors?: (
+        reportID: string | undefined,
+        reportAction: OnyxTypes.ReportAction | null | undefined,
+        originalReportID: string | undefined,
+        ignore?: IgnoreDirection,
+        keys?: string[],
+    ) => void;
 
     /** Function to dismiss the actionable whisper for tracking expenses */
     dismissTrackExpenseActionableWhisper?: (reportID: string | undefined, reportAction: OnyxEntry<OnyxTypes.ReportAction>) => void;
@@ -485,6 +495,7 @@ const isEmptyHTML = <T extends React.JSX.Element>({props: {html}}: T): boolean =
  */
 function PureReportActionItem({
     allReports,
+    allReportActions,
     policies,
     personalPolicyID,
     introSelected,
@@ -614,16 +625,18 @@ function PureReportActionItem({
 
     const dismissError = useCallback(() => {
         const transactionID = isMoneyRequestAction(action) ? getOriginalMessage(action)?.IOUTransactionID : undefined;
+        const reportActions = allReportActions?.[`${ONYXKEYS.COLLECTION.REPORT_ACTIONS}${reportID}`];
+        const originalReportID = getOriginalReportID(reportID, action, reportActions);
         if (isSendingMoney && transactionID && reportID) {
             const chatReport = allReports?.[`${ONYXKEYS.COLLECTION.REPORT}${report?.chatReportID}`];
-            cleanUpMoneyRequest(transactionID, action, reportID, report, chatReport, undefined, true);
+            cleanUpMoneyRequest(transactionID, action, reportID, report, chatReport, undefined, originalReportID, true);
             return;
         }
         if (transactionID) {
             clearError(transactionID);
         }
-        clearAllRelatedReportActionErrors(reportID, action);
-    }, [action, isSendingMoney, clearAllRelatedReportActionErrors, reportID, allReports, report, clearError]);
+        clearAllRelatedReportActionErrors(reportID, action, originalReportID);
+    }, [action, isSendingMoney, clearAllRelatedReportActionErrors, reportID, allReports, allReportActions, report, clearError]);
 
     const showDismissReceiptErrorModal = useCallback(async () => {
         const result = await showConfirmModal({

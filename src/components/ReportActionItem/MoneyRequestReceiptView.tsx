@@ -25,6 +25,7 @@ import {
     canEditMoneyRequest,
     canUserPerformWriteAction as canUserPerformWriteActionReportUtils,
     getCreationReportErrors,
+    getOriginalReportID,
     isInvoiceReport,
     isPaidGroupPolicy,
     isTrackExpenseReportNew,
@@ -106,6 +107,7 @@ function MoneyRequestReceiptView({
         canEvict: false,
         canBeMissing: true,
     });
+    const [allReportActions] = useOnyx(ONYXKEYS.COLLECTION.REPORT_ACTIONS, {canBeMissing: true});
     const [conciergeReportID] = useOnyx(ONYXKEYS.CONCIERGE_REPORT_ID, {canBeMissing: true});
 
     const [isLoading, setIsLoading] = useState(true);
@@ -223,13 +225,24 @@ function MoneyRequestReceiptView({
         if (!report?.reportID) {
             return;
         }
+        const reportActions = allReportActions?.[`${ONYXKEYS.COLLECTION.REPORT_ACTIONS}${report.reportID}`];
+        const originalReportID = getOriginalReportID(report.reportID, parentReportAction, reportActions);
         if (transaction?.pendingAction === CONST.RED_BRICK_ROAD_PENDING_ACTION.ADD) {
             if (chatReport?.reportID && getCreationReportErrors(chatReport)) {
                 navigateToConciergeChatAndDeleteReport(chatReport.reportID, conciergeReportID, true, true);
                 return;
             }
             if (parentReportAction) {
-                cleanUpMoneyRequest(transaction?.transactionID ?? linkedTransactionID, parentReportAction, report.reportID, iouReport, chatIOUReport, isChatIOUReportArchived, true);
+                cleanUpMoneyRequest(
+                    transaction?.transactionID ?? linkedTransactionID,
+                    parentReportAction,
+                    report.reportID,
+                    iouReport,
+                    chatIOUReport,
+                    isChatIOUReportArchived,
+                    originalReportID,
+                    true,
+                );
                 return;
             }
         }
@@ -238,7 +251,7 @@ function MoneyRequestReceiptView({
                 return;
             }
             clearError(linkedTransactionID);
-            clearAllRelatedReportActionErrors(report.reportID, parentReportAction);
+            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID);
             return;
         }
         if (!isEmptyObject(transactionAndReportActionErrors)) {
@@ -246,7 +259,7 @@ function MoneyRequestReceiptView({
         }
         if (!isEmptyObject(errorsWithoutReportCreation)) {
             clearError(transaction.transactionID);
-            clearAllRelatedReportActionErrors(report.reportID, parentReportAction);
+            clearAllRelatedReportActionErrors(report.reportID, parentReportAction, originalReportID);
         }
         if (!isEmptyObject(reportCreationError)) {
             if (isInNarrowPaneModal) {
