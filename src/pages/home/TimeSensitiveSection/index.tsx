@@ -125,13 +125,13 @@ function TimeSensitiveSection() {
                 {/* Priority 1: Card fraud alerts */}
                 {shouldShowReviewCardFraud &&
                     cardsWithFraud.map((card) => {
-                        if (!card.message?.possibleFraud) {
+                        if (!card.nameValuePairs?.possibleFraud) {
                             return null;
                         }
                         return (
                             <ReviewCardFraud
                                 key={card.cardID}
-                                possibleFraud={card.message.possibleFraud}
+                                possibleFraud={card.nameValuePairs.possibleFraud}
                             />
                         );
                     })}
