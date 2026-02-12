@@ -136,32 +136,39 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
     }, []);
 
     /**
-     * Handle PDF download - initiates generation and waits for completion.
-     * This callback is called both on button press and when generation completes.
+     * Handle PDF export button press - initiates generation.
+     * Always generates fresh (no caching).
      */
-    const processPDFDownload = useCallback(() => {
+    const handlePDFExport = useCallback(() => {
         // If isGenerating is stuck from a previous failed request, clear it and proceed
         if (isGenerating) {
             clearTravelInvoiceStatementState();
         }
 
         const {startDate, endDate} = getDateRange();
-        const statementKey = `${policyID}_${startDate}_${endDate}`;
 
         setIsDownloading(true);
 
-        // Check if we already have a cached PDF for this date range
-        const existingFilename = travelInvoiceStatement?.[statementKey];
-        if (typeof existingFilename === 'string' && existingFilename) {
-            const downloadFileName = `Travel_Statement_${startDate}_${endDate}.pdf`;
-            const pdfURL = `${baseURL}secure?secureType=pdfreport&filename=${existingFilename}&downloadName=${downloadFileName}`;
-            fileDownload(translate, pdfURL, downloadFileName).finally(() => setIsDownloading(false));
-            return;
-        }
-
-        // Request PDF generation
+        // Always generate fresh - no caching
         generateTravelInvoiceStatementPDF(policyID, startDate, endDate);
-    }, [baseURL, getDateRange, isGenerating, policyID, translate, travelInvoiceStatement]);
+    }, [getDateRange, isGenerating, policyID]);
+
+    /**
+     * Download the generated PDF using the filename from Onyx.
+     */
+    const downloadGeneratedPDF = useCallback(() => {
+        const {startDate, endDate} = getDateRange();
+        const statementKey = `${policyID}_${startDate}_${endDate}`;
+        const filename = travelInvoiceStatement?.[statementKey];
+
+        if (typeof filename === 'string' && filename) {
+            const downloadFileName = `Travel_Statement_${startDate}_${endDate}.pdf`;
+            const pdfURL = `${baseURL}secure?secureType=pdfreport&filename=${filename}&downloadName=${downloadFileName}`;
+            fileDownload(translate, pdfURL, downloadFileName).finally(() => setIsDownloading(false));
+        } else {
+            setIsDownloading(false);
+        }
+    }, [baseURL, getDateRange, policyID, translate, travelInvoiceStatement]);
 
     /**
      * Handle CSV download - direct download via stream.
@@ -173,15 +180,11 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
 
     // eslint-disable-next-line rulesdir/prefer-early-return
     useEffect(() => {
-        // If the statement generation is complete, download it automatically.
+        // When PDF generation completes, download it automatically.
         if (prevIsGenerating && !isGenerating) {
-            if (travelInvoiceStatement) {
-                processPDFDownload();
-            } else {
-                setIsDownloading(false);
-            }
+            downloadGeneratedPDF();
         }
-    }, [prevIsGenerating, isGenerating, processPDFDownload, travelInvoiceStatement]);
+    }, [prevIsGenerating, isGenerating, downloadGeneratedPDF]);
 
     const computedTitle = getComputedTitle();
 
@@ -213,7 +216,7 @@ function WorkspaceTravelInvoicingExportPage({route}: WorkspaceTravelInvoicingExp
                         <>
                             <Button
                                 text={translate('workspace.moreFeatures.travel.travelInvoicing.exportToPDF')}
-                                onPress={processPDFDownload}
+                                onPress={handlePDFExport}
                                 isLoading={isDownloading}
                                 large
                                 style={styles.mb3}
