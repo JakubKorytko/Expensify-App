@@ -1,7 +1,7 @@
 ---
 title: How to Use Insights in Expensify
 description: Learn how to use Insights to analyze spending trends and make data-driven financial decisions in New Expensify.
-keywords: [New Expensify, Insights, spending analysis, expense reports, analytics, Top Spenders, Top Categories, Top Merchants, financial insights, budget analysis, expense trends]
+keywords: [New Expensify, Insights, spending analysis, expense reports, analytics, Top Spenders, Top Categories, Top Merchants, Spend over time, financial insights, budget analysis, expense trends]
 internalScope: Audience is all workspace members. Covers how Insights reports work, how to access them, available report types, grouping logic, view modes, exporting data, and customization. Does not cover troubleshooting individual reports.
 ---
 
@@ -30,10 +30,23 @@ You can access Insights on both web and mobile.
 2. Scroll to **Insights**. 
 3. Select an Insight to open the report.
 
-
 ---
 
 # Available Insights
+
+## Spend over time
+
+Spend over time shows how total expenses change across a selected date range.
+
+You can use Spend over time to:
+
+ - Monitor overall spending trends
+ - Identify increases or decreases in expenses
+ - Compare spend across months or custom date ranges
+ - Track seasonal or recurring spending patterns
+ - Support budgeting and forecasting decisions
+
+[Learn more about the Spend over time report](https://help.expensify.com/articles/new-expensify/insights/View-the-Spend-over-time-report). 
 
 ## Top Spenders
 
@@ -46,7 +59,7 @@ You can use Top Spenders to:
 - Evaluate policy compliance
 - Support reimbursement and approval reviews
 
-[Learn more about the Top Spenders report](https://help.expensify.com/articles/new-expensify/insights/View-the-Top-Spenders-report)
+[Learn more about the Top Spenders report](https://help.expensify.com/articles/new-expensify/insights/View-the-Top-Spenders-report).
 
 ---
 
@@ -94,19 +107,15 @@ Each Insight is powered by Expensify's search query engine using grouping filter
 Insights support four viewing modes:
 
 **Bar View**
-
 Displays grouped results as a bar chart. This is the default view for **Top categories** and makes comparisons easy at a glance.
 
 **Table View**
-
 Displays grouped data in rows and columns for more detailed analysis. This is the default view for **Top spenders** and simplifies side-by-side comparisons. 
 
 **Line View**
-
 Displays grouped data in a line chart for analyzing trends. This is the default view for **Spend over time** and helps you monitor changes and patterns.
 
 **Pie view**
-
 Displays grouped data as a pie chart to show proportional distribution. This is the default for **Top merchants** and helps you understand distribution instantly.
 
 ---
@@ -130,7 +139,6 @@ While you can't modify the suggested Insight searches directly, you can:
 - Save a modified search
 
 ## How to create a custom spending report using Insights
-
 
 If you want to build your own grouped report:
 
