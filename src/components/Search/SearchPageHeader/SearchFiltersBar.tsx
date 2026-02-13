@@ -313,6 +313,7 @@ function SearchFiltersBar({
             if (updatedFilterFormValues.type !== searchAdvancedFiltersForm.type) {
                 updatedFilterFormValues.columns = [];
                 updatedFilterFormValues.status = CONST.SEARCH.STATUS.EXPENSE.ALL;
+                updatedFilterFormValues.from = undefined;
                 // Filter out invalid "has" values for the new type
                 updatedFilterFormValues.has = filterValidHasValues(updatedFilterFormValues.has, updatedFilterFormValues.type, translate);
             }
@@ -344,7 +345,7 @@ function SearchFiltersBar({
     );
 
     const openAdvancedFilters = useCallback(() => {
-        updateAdvancedFilters(filterFormValues);
+        updateAdvancedFilters(filterFormValues, true);
         Navigation.navigate(ROUTES.SEARCH_ADVANCED_FILTERS.getRoute());
     }, [filterFormValues]);
 
