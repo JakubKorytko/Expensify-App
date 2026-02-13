@@ -217,7 +217,6 @@ function MoneyReportHeader({
     const [transactionThreadReport] = useOnyx(`${ONYXKEYS.COLLECTION.REPORT}${transactionThreadReportID}`, {canBeMissing: true});
     const [reportPDFFilename] = useOnyx(`${ONYXKEYS.COLLECTION.NVP_EXPENSIFY_REPORT_PDF_FILENAME}${moneyRequestReport?.reportID}`, {canBeMissing: true}) ?? null;
     const [session] = useOnyx(ONYXKEYS.SESSION, {canBeMissing: false});
-    const encryptedAuthToken = session?.encryptedAuthToken ?? '';
     const [bankAccountList] = useOnyx(ONYXKEYS.BANK_ACCOUNT_LIST, {canBeMissing: true});
     const [activePolicyID] = useOnyx(ONYXKEYS.NVP_ACTIVE_POLICY_ID, {canBeMissing: true});
     const activePolicy = usePolicy(activePolicyID);
@@ -1625,9 +1624,9 @@ function MoneyReportHeader({
         if (!hasFinishedPDFDownload || !canTriggerAutomaticPDFDownload.current) {
             return;
         }
-        downloadReportPDF(reportPDFFilename, moneyRequestReport?.reportName ?? '', translate, currentUserLogin ?? '', encryptedAuthToken);
+        downloadReportPDF(reportPDFFilename, moneyRequestReport?.reportName ?? '', translate, currentUserLogin ?? '');
         canTriggerAutomaticPDFDownload.current = false;
-    }, [hasFinishedPDFDownload, reportPDFFilename, moneyRequestReport?.reportName, translate, currentUserLogin, encryptedAuthToken]);
+    }, [hasFinishedPDFDownload, reportPDFFilename, moneyRequestReport?.reportName, translate, currentUserLogin]);
 
     const shouldShowBackButton = shouldDisplayBackButton || shouldUseNarrowLayout;
 
@@ -1966,7 +1965,7 @@ function MoneyReportHeader({
                                 if (!hasFinishedPDFDownload) {
                                     setIsPDFModalVisible(false);
                                 } else {
-                                    downloadReportPDF(reportPDFFilename, moneyRequestReport?.reportName ?? '', translate, currentUserLogin ?? '', encryptedAuthToken);
+                                    downloadReportPDF(reportPDFFilename, moneyRequestReport?.reportName ?? '', translate, currentUserLogin ?? '');
                                 }
                             }}
                             text={hasFinishedPDFDownload ? translate('common.download') : translate('common.cancel')}
