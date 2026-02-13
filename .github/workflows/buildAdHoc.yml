@@ -110,7 +110,9 @@ jobs:
 
       - name: Deploy to S3 for internal testing
         run: |
-          # Upload content-hashed bundles with immutable caching (1 year)
+          # Upload content-hashed bundles with long-lived caching (1 year).
+          # These are safe to cache because the filename includes a content hash
+          # that changes whenever the code changes.
           aws s3 sync --acl public-read \
             --cache-control "public, max-age=31536000, immutable" \
             --exclude "*" \
@@ -118,9 +120,8 @@ jobs:
             --include "*.bundle.js.map" \
             "$GITHUB_WORKSPACE"/dist s3://ad-hoc-expensify-cash/web/"$PULL_REQUEST_NUMBER"
 
-          # Upload everything else with short cache + must-revalidate
+          # Upload everything else without explicit cache headers.
           aws s3 sync --acl public-read \
-            --cache-control "public, max-age=60, must-revalidate" \
             --exclude "*.bundle.js" \
             --exclude "*.bundle.js.map" \
             "$GITHUB_WORKSPACE"/dist s3://ad-hoc-expensify-cash/web/"$PULL_REQUEST_NUMBER"
