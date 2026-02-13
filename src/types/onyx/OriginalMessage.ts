@@ -845,6 +845,9 @@ type PolicyRulesModifiedFields = {
     /** The value that the tag was changed to */
     tag?: string;
 
+    /** The value that the comment was changed to */
+    comment?: string;
+
     /** The value that the description was changed to */
     description?: string;
 

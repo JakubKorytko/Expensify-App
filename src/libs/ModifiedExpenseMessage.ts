@@ -223,11 +223,17 @@ function getPolicyRulesModifiedMessage(translate: LocalizedTranslate, fields: Po
         }
 
         const updatedValue = value as string;
+
         if (key === 'category') {
             return translate('iou.policyRulesModifiedFields.common', key, getDecodedCategoryName(updatedValue), isFirst);
         }
+
         if (key === 'tag') {
             return translate('iou.policyRulesModifiedFields.common', key, getCommaSeparatedTagNameWithSanitizedColons(updatedValue), isFirst);
+        }
+
+        if (key === 'comment') {
+            return translate('iou.policyRulesModifiedFields.common', translate('common.description'), updatedValue, isFirst);
         }
 
         return translate('iou.policyRulesModifiedFields.common', key, updatedValue, isFirst);
