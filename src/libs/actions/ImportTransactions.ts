@@ -350,8 +350,12 @@ function importTransactionsFromCSV(spreadsheet: ImportedSpreadsheet, existingCar
         columnMappings: JSON.stringify(columnLayout),
     };
 
-    const optimisticData: Array<OnyxUpdate<typeof ONYXKEYS.COLLECTION.TRANSACTION | typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.IMPORTED_SPREADSHEET>> = [];
-    const failureData: Array<OnyxUpdate<typeof ONYXKEYS.COLLECTION.TRANSACTION | typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.IMPORTED_SPREADSHEET>> = [];
+    const optimisticData: Array<
+        OnyxUpdate<typeof ONYXKEYS.COLLECTION.TRANSACTION | typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.IMPORTED_SPREADSHEET | typeof ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST>
+    > = [];
+    const failureData: Array<
+        OnyxUpdate<typeof ONYXKEYS.COLLECTION.TRANSACTION | typeof ONYXKEYS.CARD_LIST | typeof ONYXKEYS.IMPORTED_SPREADSHEET | typeof ONYXKEYS.NVP_SAVED_CSV_COLUMN_LAYOUT_LIST>
+    > = [];
 
     // Only add card to optimistic data if we're creating a new card
     if (!isAddingToExistingCard && optimisticCard) {
