@@ -1498,6 +1498,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `将 ${field} 设置为“${value}”` : `${field} 至 “${value}”`;
             },
             format: (fragments: string, route: string) => `${fragments} 通过 <a href="${route}">工作区规则</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `将描述设置为“${value}”` : `描述为“${value}”`),
         },
         duplicateNonDefaultWorkspacePerDiemError: '您无法在不同工作区之间复制每日津贴报销，因为各工作区的补贴标准可能不同。',
     },

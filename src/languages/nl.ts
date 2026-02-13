@@ -1523,6 +1523,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `stel de ${field} in op "${value}"` : `${field} naar "${value}"`;
             },
             format: (fragments: string, route: string) => `${fragments} via <a href="${route}">werkruimte­regels</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `stel de beschrijving in op ‘${value}’` : `beschrijving naar "${value}"`),
         },
         duplicateNonDefaultWorkspacePerDiemError: 'Je kunt dagvergoedingen niet dupliceren tussen werkruimtes, omdat de tarieven per werkruimte kunnen verschillen.',
     },

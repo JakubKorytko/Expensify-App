@@ -1533,6 +1533,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `définir ${field} sur « ${value} »` : `${field} à « ${value} »`;
             },
             format: (fragments: string, route: string) => `${fragments} via les <a href="${route}">règles de l’espace de travail</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `définir la description sur « ${value} »` : `description à « ${value} »`),
         },
         duplicateNonDefaultWorkspacePerDiemError:
             'Vous ne pouvez pas dupliquer les indemnités journalières entre plusieurs espaces de travail, car les taux peuvent différer d’un espace de travail à l’autre.',

@@ -1524,6 +1524,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `imposta ${field} su "${value}"` : `${field} a "${value}"`;
             },
             format: (fragments: string, route: string) => `${fragments} tramite le <a href="${route}">regole dello spazio di lavoro</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `imposta la descrizione su "${value}"` : `descrizione in “${value}”`),
         },
         duplicateNonDefaultWorkspacePerDiemError: 'Non puoi duplicare le spese di diaria tra diversi spazi di lavoro perché le tariffe potrebbero essere diverse tra gli spazi di lavoro.',
     },

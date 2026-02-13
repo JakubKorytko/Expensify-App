@@ -1518,6 +1518,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `${field} を「${value}」に設定する` : `${field} から「${value}」へ`;
             },
             format: (fragments: string, route: string) => `${fragments}（<a href="${route}">ワークスペースルール</a>経由）`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `説明を「${value}」に設定` : `説明を「${value}」に設定`),
         },
         duplicateNonDefaultWorkspacePerDiemError: 'ワークスペースごとに日当レートが異なる場合があるため、日当経費をワークスペース間で複製することはできません。',
     },

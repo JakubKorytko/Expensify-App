@@ -1522,6 +1522,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `ustaw ${field} na „${value}”` : `${field} na „${value}”`;
             },
             format: (fragments: string, route: string) => `${fragments} przez <a href="${route}">zasady przestrzeni roboczej</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `ustaw opis na „${value}”` : `opis na „${value}”`),
         },
         duplicateNonDefaultWorkspacePerDiemError:
             'Nie możesz duplikować wydatków z tytułu diet między przestrzeniami roboczymi, ponieważ stawki mogą się różnić między poszczególnymi przestrzeniami.',

@@ -1527,6 +1527,7 @@ const translations: TranslationDeepObject<typeof en> = {
                 return isFirst ? `setze ${field} auf „${value}“` : `${field} zu „${value}“`;
             },
             format: (fragments: string, route: string) => `${fragments} über <a href="${route}">Workspace-Regeln</a>`,
+            description: (value: string, isFirst: boolean) => (isFirst ? `Beschreibung auf „${value}“ festlegen` : `Beschreibung zu „${value}“`),
         },
         duplicateNonDefaultWorkspacePerDiemError:
             'Sie können Per-Diem-Ausgaben nicht über mehrere Workspaces hinweg duplizieren, da sich die Sätze zwischen den Workspaces unterscheiden können.',
