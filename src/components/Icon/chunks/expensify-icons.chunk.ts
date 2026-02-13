@@ -188,6 +188,7 @@ import ReceiptSlash from '@assets/images/receipt-slash.svg';
 import Receipt from '@assets/images/receipt.svg';
 import RemoveMembers from '@assets/images/remove-members.svg';
 import Rotate from '@assets/images/rotate-image.svg';
+import Crop from '@assets/images/crop-image.svg';
 import RotateLeft from '@assets/images/rotate-left.svg';
 import Scan from '@assets/images/scan.svg';
 import Send from '@assets/images/send.svg';
@@ -400,6 +401,7 @@ const Expensicons = {
     ReplaceReceipt,
     ReceiptMultiple,
     Rotate,
+    Crop,
     RotateLeft,
     Scan,
     Send,
