@@ -233,7 +233,7 @@ function getPolicyRulesModifiedMessage(translate: LocalizedTranslate, fields: Po
         }
 
         if (key === 'comment') {
-            return translate('iou.policyRulesModifiedFields.common', translate('common.description'), updatedValue, isFirst);
+            return translate('iou.policyRulesModifiedFields.description', updatedValue, isFirst);
         }
 
         return translate('iou.policyRulesModifiedFields.common', key, updatedValue, isFirst);
