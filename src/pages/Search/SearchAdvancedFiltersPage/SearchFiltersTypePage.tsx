@@ -51,6 +51,13 @@ function SearchFiltersTypePage() {
                 groupBy: null,
                 status: CONST.SEARCH.STATUS.EXPENSE.ALL,
                 has: filteredHasValues,
+                from: undefined,
+                to: undefined,
+                action: undefined,
+                payer: undefined,
+                exporter: undefined,
+                reimbursable: undefined,
+                exportedOn: undefined,
             }),
         };
         updateAdvancedFilters(updatedFilters);

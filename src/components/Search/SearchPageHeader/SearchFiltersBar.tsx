@@ -309,11 +309,17 @@ function SearchFiltersBar({
                 ...values,
             };
 
-            // If the type has changed, reset the status so we dont have an invalid status selected
+            // If the type has changed, reset view-specific implicit filters so stale values don't persist
             if (updatedFilterFormValues.type !== searchAdvancedFiltersForm.type) {
                 updatedFilterFormValues.columns = [];
                 updatedFilterFormValues.status = CONST.SEARCH.STATUS.EXPENSE.ALL;
                 updatedFilterFormValues.from = undefined;
+                updatedFilterFormValues.to = undefined;
+                updatedFilterFormValues.action = undefined;
+                updatedFilterFormValues.payer = undefined;
+                updatedFilterFormValues.exporter = undefined;
+                updatedFilterFormValues.reimbursable = undefined;
+                updatedFilterFormValues.exportedOn = undefined;
                 // Filter out invalid "has" values for the new type
                 updatedFilterFormValues.has = filterValidHasValues(updatedFilterFormValues.has, updatedFilterFormValues.type, translate);
             }
