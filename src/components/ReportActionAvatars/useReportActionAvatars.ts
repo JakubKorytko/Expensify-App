@@ -75,7 +75,7 @@ function useReportActionAvatars({
                 ...(existingDetails ?? {}),
                 ...(snapshotDetails ?? {}),
                 accountID: numericAccountID,
-                avatar: snapshotDetails?.avatar || existingDetails?.avatar,
+                avatar: existingDetails?.avatar || snapshotDetails?.avatar,
             };
         }
 

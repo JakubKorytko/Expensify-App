@@ -34,7 +34,7 @@ function UserInfoCell({avatar, accountID, displayName, avatarSize, containerStyl
     );
     const [personalDetailsFromSnapshot] = useOnyx(ONYXKEYS.PERSONAL_DETAILS_LIST, {selector: personalDetailSelector, canBeMissing: true}, [accountID]);
     const personalDetailsFromOnyx = accountID ? getPersonalDetailsForAccountID(accountID) : undefined;
-    const avatarSource = avatar || personalDetailsFromSnapshot?.avatar || personalDetailsFromOnyx?.avatar;
+    const avatarSource = personalDetailsFromOnyx?.avatar || personalDetailsFromSnapshot?.avatar || avatar;
 
     if (!isCorrectSearchUserName(displayName) || !accountID) {
         return null;

@@ -536,8 +536,8 @@ function Search({
 
     useEffect(() => {
         const accountIDsToHydrate = new Set<number>();
-        const maybeQueueProfileHydration = (accountID: number | undefined, rowAvatar?: AvatarSource) => {
-            if (!accountID || !!rowAvatar || requestedProfileAccountIDsRef.current.has(accountID) || personalDetailsMetadata?.[accountID]?.isLoading) {
+        const maybeQueueProfileHydration = (accountID: number | undefined) => {
+            if (!accountID || requestedProfileAccountIDsRef.current.has(accountID) || personalDetailsMetadata?.[accountID]?.isLoading) {
                 return;
             }
 
@@ -550,14 +550,14 @@ function Search({
 
         filteredData.forEach((item) => {
             if (isTransactionListItemType(item) || isTransactionReportGroupListItemType(item)) {
-                maybeQueueProfileHydration(item.from?.accountID, item.from?.avatar);
-                maybeQueueProfileHydration(item.to?.accountID, item.to?.avatar);
+                maybeQueueProfileHydration(item.from?.accountID);
+                maybeQueueProfileHydration(item.to?.accountID);
                 return;
             }
 
             if (isTaskListItemType(item)) {
-                maybeQueueProfileHydration(item.createdBy?.accountID, item.createdBy?.avatar);
-                maybeQueueProfileHydration(item.assignee?.accountID, item.assignee?.avatar);
+                maybeQueueProfileHydration(item.createdBy?.accountID);
+                maybeQueueProfileHydration(item.assignee?.accountID);
                 return;
             }
 
@@ -566,8 +566,8 @@ function Search({
             }
 
             item.transactions.forEach((transaction) => {
-                maybeQueueProfileHydration(transaction.from?.accountID, transaction.from?.avatar);
-                maybeQueueProfileHydration(transaction.to?.accountID, transaction.to?.avatar);
+                maybeQueueProfileHydration(transaction.from?.accountID);
+                maybeQueueProfileHydration(transaction.to?.accountID);
             });
         });
 
