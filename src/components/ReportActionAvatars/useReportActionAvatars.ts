@@ -1,5 +1,6 @@
 import type {OnyxEntry} from 'react-native-onyx';
 import type {ValueOf} from 'type-fest';
+import {useMemo} from 'react';
 import {usePersonalDetails} from '@components/OnyxListItemProvider';
 import useDefaultAvatars from '@hooks/useDefaultAvatars';
 import useLocalize from '@hooks/useLocalize';
@@ -23,7 +24,7 @@ import {
 import {getDefaultAvatar} from '@libs/UserAvatarUtils';
 import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
-import type {InvitedEmailsToAccountIDs, OnyxInputOrEntry, Policy, Report, ReportAction} from '@src/types/onyx';
+import type {InvitedEmailsToAccountIDs, OnyxInputOrEntry, PersonalDetailsList, Policy, Report, ReportAction} from '@src/types/onyx';
 import type {Icon as IconType} from '@src/types/onyx/OnyxCommon';
 import useReportPreviewSenderID from './useReportPreviewSenderID';
 
@@ -59,9 +60,27 @@ function useReportActionAvatars({
     const [personalDetailsFromSnapshot] = useOnyx(ONYXKEYS.PERSONAL_DETAILS_LIST, {
         canBeMissing: true,
     });
-    // When the search hash changes, personalDetails from the snapshot will be undefined if it hasn't been fetched yet.
-    // Therefore, we will fall back to allPersonalDetails while the data is being fetched.
-    const personalDetails = personalDetailsFromSnapshot ?? allPersonalDetails;
+    // Search snapshots can contain partial/stale personalDetails that temporarily blank avatar fields.
+    // Merge snapshot details over live details, but preserve live avatar when snapshot avatar is missing.
+    const personalDetails = useMemo(() => {
+        if (!personalDetailsFromSnapshot) {
+            return allPersonalDetails;
+        }
+
+        const mergedDetails: PersonalDetailsList = {...(allPersonalDetails ?? {})};
+        for (const [accountID, snapshotDetails] of Object.entries(personalDetailsFromSnapshot)) {
+            const numericAccountID = Number(accountID);
+            const existingDetails = mergedDetails[numericAccountID];
+            mergedDetails[numericAccountID] = {
+                ...(existingDetails ?? {}),
+                ...(snapshotDetails ?? {}),
+                accountID: numericAccountID,
+                avatar: snapshotDetails?.avatar || existingDetails?.avatar,
+            };
+        }
+
+        return mergedDetails;
+    }, [allPersonalDetails, personalDetailsFromSnapshot]);
 
     const isReportAChatReport = report?.type === CONST.REPORT.TYPE.CHAT && report?.chatType !== CONST.REPORT.CHAT_TYPE.TRIP_ROOM;
 
