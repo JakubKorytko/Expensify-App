@@ -1,14 +1,18 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import type {StyleProp, TextStyle, ViewStyle} from 'react-native';
 import {View} from 'react-native';
+import type {OnyxEntry} from 'react-native-onyx';
 import Avatar from '@components/Avatar';
 import Text from '@components/Text';
 import useResponsiveLayout from '@hooks/useResponsiveLayout';
 import useThemeStyles from '@hooks/useThemeStyles';
+import useOnyx from '@hooks/useOnyx';
 import {isCorrectSearchUserName} from '@libs/SearchUIUtils';
 import type {AvatarSource} from '@libs/UserAvatarUtils';
 import type {AvatarSizeName} from '@styles/utils';
 import CONST from '@src/CONST';
+import ONYXKEYS from '@src/ONYXKEYS';
+import type {PersonalDetailsList} from '@src/types/onyx';
 
 type UserInfoCellProps = {
     accountID: number | undefined;
@@ -23,6 +27,12 @@ type UserInfoCellProps = {
 function UserInfoCell({avatar, accountID, displayName, avatarSize, containerStyle, textStyle, avatarStyle}: UserInfoCellProps) {
     const styles = useThemeStyles();
     const {isLargeScreenWidth} = useResponsiveLayout();
+    const personalDetailSelector = useCallback(
+        (personalDetailsList: OnyxEntry<PersonalDetailsList>) => (accountID ? personalDetailsList?.[accountID] : undefined),
+        [accountID],
+    );
+    const [personalDetails] = useOnyx(ONYXKEYS.PERSONAL_DETAILS_LIST, {selector: personalDetailSelector, canBeMissing: true}, [accountID]);
+    const avatarSource = avatar || personalDetails?.avatar;
 
     if (!isCorrectSearchUserName(displayName) || !accountID) {
         return null;
@@ -33,7 +43,7 @@ function UserInfoCell({avatar, accountID, displayName, avatarSize, containerStyl
             <Avatar
                 imageStyles={[styles.alignSelfCenter]}
                 size={avatarSize ?? CONST.AVATAR_SIZE.MID_SUBSCRIPT}
-                source={avatar}
+                source={avatarSource}
                 name={displayName}
                 type={CONST.ICON_TYPE_AVATAR}
                 avatarID={accountID}
