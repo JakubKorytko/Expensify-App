@@ -575,6 +575,7 @@ function Search({
             .slice(0, MAX_PROFILE_HYDRATION_REQUESTS_PER_RENDER)
             .forEach((accountID) => {
                 requestedProfileAccountIDsRef.current.add(accountID);
+                Log.info('[AvatarDebug][SearchHydration] Requesting public profile for missing avatar', false, {accountID});
                 openPublicProfilePage(accountID);
             });
     }, [filteredData, personalDetailsMetadata]);
