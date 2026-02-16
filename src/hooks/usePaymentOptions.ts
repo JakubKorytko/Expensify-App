@@ -24,7 +24,6 @@ import useCurrentUserPersonalDetails from './useCurrentUserPersonalDetails';
 import {useMemoizedLazyExpensifyIcons} from './useLazyAsset';
 import useLocalize from './useLocalize';
 import useOnyx from './useOnyx';
-import usePermissions from './usePermissions';
 import usePolicy from './usePolicy';
 import useThemeStyles from './useThemeStyles';
 
@@ -101,8 +100,6 @@ function usePaymentOptions({
     const isLoadingLastPaymentMethod = isLoadingOnyxValue(lastPaymentMethodResult);
     const [bankAccountList = getEmptyObject<BankAccountList>()] = useOnyx(ONYXKEYS.BANK_ACCOUNT_LIST, {canBeMissing: true});
     const [fundList = getEmptyObject<FundList>()] = useOnyx(ONYXKEYS.FUND_LIST, {canBeMissing: true});
-    const {isBetaEnabled} = usePermissions();
-    const isPayInvoiceViaExpensifyBetaEnabled = isBetaEnabled(CONST.BETAS.PAY_INVOICE_VIA_EXPENSIFY);
     const lastPaymentMethodRef = useRef(lastPaymentMethod);
 
     useEffect(() => {
@@ -166,7 +163,7 @@ function usePaymentOptions({
 
         if (isInvoiceReport) {
             const formattedPaymentMethods = formatPaymentMethods(bankAccountList, fundList, styles, translate);
-            const showPayViaExpensifyOptions = isPayInvoiceViaExpensifyBetaEnabled && isCurrencySupportedForGlobalReimbursement(currency as CurrencyType);
+            const isCurrencySupported = isCurrencySupportedForGlobalReimbursement(currency as CurrencyType);
             const getPaymentSubItems = (payAsBusiness: boolean) => {
                 const requiredAccountType = payAsBusiness ? CONST.BANK_ACCOUNT.TYPE.BUSINESS : CONST.BANK_ACCOUNT.TYPE.PERSONAL;
                 return formattedPaymentMethods
@@ -202,14 +199,14 @@ function usePaymentOptions({
                     value: CONST.IOU.PAYMENT_TYPE.ELSEWHERE,
                     backButtonText: translate('iou.individual'),
                     subMenuItems: [
-                        ...(showPayViaExpensifyOptions ? getPaymentSubItems(false) : []),
+                        ...(isCurrencySupported ? getPaymentSubItems(false) : []),
                         {
                             text: translate('iou.payElsewhere', ''),
                             icon: icons.Cash,
                             value: CONST.IOU.PAYMENT_TYPE.ELSEWHERE,
                             onSelected: () => onPress(CONST.IOU.PAYMENT_TYPE.ELSEWHERE),
                         },
-                        ...(showPayViaExpensifyOptions ? [addBankAccountItem] : []),
+                        ...(isCurrencySupported ? [addBankAccountItem] : []),
                     ],
                 });
             }
@@ -220,8 +217,8 @@ function usePaymentOptions({
                 value: CONST.IOU.PAYMENT_TYPE.ELSEWHERE,
                 backButtonText: translate('iou.business'),
                 subMenuItems: [
-                    ...(showPayViaExpensifyOptions ? getPaymentSubItems(true) : []),
-                    ...(showPayViaExpensifyOptions ? [addBankAccountItem] : []),
+                    ...(isCurrencySupported ? getPaymentSubItems(true) : []),
+                    ...(isCurrencySupported ? [addBankAccountItem] : []),
                     {
                         text: translate('iou.payElsewhere', ''),
                         icon: icons.Cash,
