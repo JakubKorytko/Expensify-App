@@ -21,13 +21,23 @@ type TopBarProps = {
     shouldDisplaySearch?: boolean;
     shouldDisplayHelpButton?: boolean;
     shouldShowLoadingBar?: boolean;
+    /** When true, ignores the auto-detection hook and only uses shouldShowLoadingBar prop */
+    shouldDisableAutoLoadingBar?: boolean;
     cancelSearch?: () => void;
     children?: React.ReactNode;
 };
 
 const authTokenTypeSelector = (session: OnyxEntry<Session>) => session && {authTokenType: session.authTokenType};
 
-function TopBar({breadcrumbLabel, shouldDisplaySearch = true, shouldDisplayHelpButton = true, cancelSearch, shouldShowLoadingBar = false, children}: TopBarProps) {
+function TopBar({
+    breadcrumbLabel,
+    shouldDisplaySearch = true,
+    shouldDisplayHelpButton = true,
+    cancelSearch,
+    shouldShowLoadingBar = false,
+    shouldDisableAutoLoadingBar = false,
+    children,
+}: TopBarProps) {
     const styles = useThemeStyles();
     const {translate} = useLocalize();
     const [session] = useOnyx(ONYXKEYS.SESSION, {selector: authTokenTypeSelector, canBeMissing: true});
@@ -72,7 +82,7 @@ function TopBar({breadcrumbLabel, shouldDisplaySearch = true, shouldDisplayHelpB
                 {shouldDisplayHelpButton && <SidePanelButton />}
                 {displaySearch && <SearchButton />}
             </View>
-            <LoadingBar shouldShow={!isWideRHPVisible && (shouldShowLoadingBarForReports || shouldShowLoadingBar)} />
+            <LoadingBar shouldShow={!isWideRHPVisible && ((!shouldDisableAutoLoadingBar && shouldShowLoadingBarForReports) || shouldShowLoadingBar)} />
         </View>
     );
 }

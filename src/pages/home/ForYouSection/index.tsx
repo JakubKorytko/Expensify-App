@@ -1,6 +1,5 @@
 import React from 'react';
 import {View} from 'react-native';
-import ActivityIndicator from '@components/ActivityIndicator';
 import BaseWidgetItem from '@components/BaseWidgetItem';
 import WidgetContainer from '@components/WidgetContainer';
 import {useMemoizedLazyExpensifyIcons} from '@hooks/useLazyAsset';
@@ -17,6 +16,7 @@ import ROUTES from '@src/ROUTES';
 import {accountIDSelector} from '@src/selectors/Session';
 import todosReportCountsSelector from '@src/selectors/Todos';
 import EmptyState from './EmptyState';
+import ForYouSkeleton from './ForYouSkeleton';
 
 function ForYouSection() {
     const styles = useThemeStyles();
@@ -25,6 +25,7 @@ function ForYouSection() {
     const {shouldUseNarrowLayout} = useResponsiveLayout();
     const [accountID] = useOnyx(ONYXKEYS.SESSION, {canBeMissing: false, selector: accountIDSelector});
     const [isLoadingApp = true] = useOnyx(ONYXKEYS.IS_LOADING_APP, {canBeMissing: true});
+    const [isLoadingReportData = false] = useOnyx(ONYXKEYS.IS_LOADING_REPORT_DATA, {canBeMissing: true});
     const [reportCounts = CONST.EMPTY_TODOS_REPORT_COUNTS] = useOnyx(ONYXKEYS.DERIVED.TODOS, {canBeMissing: true, selector: todosReportCountsSelector});
 
     const icons = useMemoizedLazyExpensifyIcons(['MoneyBag', 'Send', 'ThumbsUp', 'Export']);
@@ -97,12 +98,8 @@ function ForYouSection() {
     );
 
     const renderContent = () => {
-        if (isLoadingApp) {
-            return (
-                <View style={[styles.flex1, styles.alignItemsCenter, styles.justifyContentCenter, styles.pv6, styles.mb8]}>
-                    <ActivityIndicator size={CONST.ACTIVITY_INDICATOR_SIZE.LARGE} />
-                </View>
-            );
+        if (isLoadingApp || isLoadingReportData) {
+            return <ForYouSkeleton />;
         }
 
         return hasAnyTodos ? renderTodoItems() : <EmptyState />;
