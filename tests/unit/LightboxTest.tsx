@@ -2,8 +2,8 @@ import {fireEvent, render, screen} from '@testing-library/react-native';
 import React from 'react';
 import type {View as RNView} from 'react-native';
 import type {SharedValue} from 'react-native-reanimated';
-import AttachmentCarouselPagerContext from '@components/Attachments/AttachmentCarousel/Pager/AttachmentCarouselPagerContext';
-import type {AttachmentCarouselPagerContextValue} from '@components/Attachments/AttachmentCarousel/Pager/AttachmentCarouselPagerContext';
+import {AttachmentCarouselPagerActionsContext, AttachmentCarouselPagerStateContext} from '@components/Attachments/AttachmentCarousel/Pager/AttachmentCarouselPagerContext';
+import type {AttachmentCarouselPagerActionsContextType, AttachmentCarouselPagerStateContextType} from '@components/Attachments/AttachmentCarousel/Pager/AttachmentCarouselPagerContext';
 import Lightbox from '@components/Lightbox';
 import CONST from '@src/CONST';
 import waitForBatchedUpdatesWithAct from '../utils/waitForBatchedUpdatesWithAct';
@@ -65,27 +65,38 @@ function createPagerItems(count: number) {
     }));
 }
 
-function createContextValue(activePage: number, itemCount: number): AttachmentCarouselPagerContextValue {
+type ContextValues = {
+    stateValue: AttachmentCarouselPagerStateContextType;
+    actionsValue: AttachmentCarouselPagerActionsContextType;
+};
+
+function createContextValues(activePage: number, itemCount: number): ContextValues {
     return {
-        pagerItems: createPagerItems(itemCount),
-        activePage,
-        isPagerScrolling: createSharedValue(false),
-        isScrollEnabled: createSharedValue(true),
-        pagerRef: {current: null},
-        onTap: jest.fn(),
-        onScaleChanged: jest.fn(),
-        onSwipeDown: jest.fn(),
+        stateValue: {
+            pagerItems: createPagerItems(itemCount),
+            activePage,
+            isPagerScrolling: createSharedValue(false),
+            isScrollEnabled: createSharedValue(true),
+            pagerRef: {current: null},
+        },
+        actionsValue: {
+            onTap: jest.fn(),
+            onScaleChanged: jest.fn(),
+            onSwipeDown: jest.fn(),
+        },
     };
 }
 
-async function renderLightboxInCarousel(attachmentID: string, uri: string, contextValue: AttachmentCarouselPagerContextValue) {
+async function renderLightboxInCarousel(attachmentID: string, uri: string, contextValues: ContextValues) {
     render(
-        <AttachmentCarouselPagerContext.Provider value={contextValue}>
-            <Lightbox
-                attachmentID={attachmentID}
-                uri={uri}
-            />
-        </AttachmentCarouselPagerContext.Provider>,
+        <AttachmentCarouselPagerStateContext.Provider value={contextValues.stateValue}>
+            <AttachmentCarouselPagerActionsContext.Provider value={contextValues.actionsValue}>
+                <Lightbox
+                    attachmentID={attachmentID}
+                    uri={uri}
+                />
+            </AttachmentCarouselPagerActionsContext.Provider>
+        </AttachmentCarouselPagerStateContext.Provider>,
     );
 
     await waitForBatchedUpdatesWithAct();
@@ -100,25 +111,25 @@ async function renderLightboxInCarousel(attachmentID: string, uri: string, conte
 describe('Lightbox', () => {
     describe('fallback rendering range', () => {
         it('should not render any image for distant pages outside FALLBACK_OFFSET range', async () => {
-            const contextValue = createContextValue(15, 30);
+            const contextValues = createContextValues(15, 30);
 
-            await renderLightboxInCarousel('attachment-0', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-0', TEST_URI, contextValues);
 
             expect(screen.queryAllByTestId('image')).toHaveLength(0);
         });
 
         it('should render fallback image for pages within FALLBACK_OFFSET range', async () => {
-            const contextValue = createContextValue(15, 30);
+            const contextValues = createContextValues(15, 30);
 
-            await renderLightboxInCarousel('attachment-13', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-13', TEST_URI, contextValues);
 
             expect(screen.getAllByTestId('image').length).toBeGreaterThan(0);
         });
 
         it('should render lightbox image for the active page', async () => {
-            const contextValue = createContextValue(15, 30);
+            const contextValues = createContextValues(15, 30);
 
-            await renderLightboxInCarousel('attachment-15', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-15', TEST_URI, contextValues);
 
             expect(screen.getByTestId('multi-gesture-canvas')).toBeTruthy();
             expect(screen.getAllByTestId('image').length).toBeGreaterThan(0);
@@ -127,9 +138,9 @@ describe('Lightbox', () => {
 
     describe('image priority', () => {
         it('should assign HIGH priority to the active page image', async () => {
-            const contextValue = createContextValue(5, 30);
+            const contextValues = createContextValues(5, 30);
 
-            await renderLightboxInCarousel('attachment-5', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-5', TEST_URI, contextValues);
 
             const images = screen.getAllByTestId('image');
             expect(images.length).toBeGreaterThan(0);
@@ -139,9 +150,9 @@ describe('Lightbox', () => {
         });
 
         it('should assign NORMAL priority to non-active pages within the lightbox visible range', async () => {
-            const contextValue = createContextValue(5, 30);
+            const contextValues = createContextValues(5, 30);
 
-            await renderLightboxInCarousel('attachment-4', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-4', TEST_URI, contextValues);
 
             const images = screen.getAllByTestId('image');
             expect(images.length).toBeGreaterThan(0);
@@ -151,9 +162,9 @@ describe('Lightbox', () => {
         });
 
         it('should assign LOW priority to fallback images outside the lightbox window', async () => {
-            const contextValue = createContextValue(15, 30);
+            const contextValues = createContextValues(15, 30);
 
-            await renderLightboxInCarousel('attachment-13', TEST_URI, contextValue);
+            await renderLightboxInCarousel('attachment-13', TEST_URI, contextValues);
 
             const images = screen.getAllByTestId('image');
             expect(images.length).toBeGreaterThan(0);
