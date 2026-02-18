@@ -33,10 +33,10 @@ describe('MultifactorAuthentication Biometrics helpers', () => {
 
         it('should handle string HTTP codes', () => {
             const responseMap = VALUES.API_RESPONSE_MAP.REQUEST_AUTHENTICATION_CHALLENGE;
-            const result = parseHttpRequest('401', responseMap, 'Too many attempts');
+            const result = parseHttpRequest('400', responseMap, 'Invalid validate code');
 
-            expect(result.httpStatusCode).toBe(401);
-            expect(result.reason).toBe(VALUES.REASON.BACKEND.TOO_MANY_ATTEMPTS);
+            expect(result.httpStatusCode).toBe(400);
+            expect(result.reason).toBe(VALUES.REASON.BACKEND.INVALID_VALIDATE_CODE);
         });
 
         it('should return unknown reason for unmapped code', () => {
