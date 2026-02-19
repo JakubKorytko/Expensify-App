@@ -101,6 +101,8 @@ export {
 };
 
 export default {
+    // TODO: when we update this to support passkeys, either figure out how to import it in src/libs/Navigation/useNavigateTo3DSAuthorizationChallenge.ts,
+    // or update the hard-coded list there too
     allowedAuthenticationMethods: [CONST.MULTIFACTOR_AUTHENTICATION.TYPE.BIOMETRICS],
     action: authorizeTransaction,
     callback: async (isSuccessful, _callbackInput, payload) => {
