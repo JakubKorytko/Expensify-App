@@ -59,6 +59,9 @@ const SET_UP_2FA_SCREENS = new Set<string>([
     SCREENS.TWO_FACTOR_AUTH.DISABLE,
 ]);
 
+// Screens which are part of the MFA/3DS flow - used to prevent navigating to incoming 3DS challenges while the user is currently completing one
+const MFA_FLOW_SCREENS = new Set<string>(Object.values(SCREENS.MULTIFACTOR_AUTHENTICATION));
+
 let account: OnyxEntry<Account>;
 // We have used `connectWithoutView` here because it is not connected to any UI
 Onyx.connectWithoutView({
@@ -84,6 +87,19 @@ function isTwoFactorSetupScreen(screen: string | undefined): boolean {
 
 function shouldShowRequire2FAPage() {
     return !!account?.needsTwoFactorAuthSetup && !account?.requiresTwoFactorAuth;
+}
+
+function isMFAFlowScreen(screen: string | undefined): boolean {
+    return screen ? MFA_FLOW_SCREENS.has(screen) : false;
+}
+
+function getIsUserViewingMFAFlowScreen() {
+    const state = navigationRef.current?.getState();
+    if (!state) {
+        return false;
+    }
+    const focusedScreen = findFocusedRoute(state)?.name;
+    return isMFAFlowScreen(focusedScreen);
 }
 
 let resolveNavigationIsReadyPromise: () => void;
@@ -940,4 +956,4 @@ export default {
     navigateBackToLastSuperWideRHPScreen,
 };
 
-export {navigationRef, getDeepestFocusedScreenName, isTwoFactorSetupScreen, shouldShowRequire2FAPage};
+export {navigationRef, getDeepestFocusedScreenName, isTwoFactorSetupScreen, shouldShowRequire2FAPage, isMFAFlowScreen, getIsUserViewingMFAFlowScreen};

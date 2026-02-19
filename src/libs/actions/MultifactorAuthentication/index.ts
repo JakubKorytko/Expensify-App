@@ -191,6 +191,11 @@ async function revokeMultifactorAuthenticationCredentials() {
 
 // CHUCK TODO named type somewhere
 async function fetchLatestTransactionsPendingReviewAndCheckIfThisOneIsInIt({transactionID}: {transactionID: string}) {
+    console.log("FOO")
+    await new Promise<void>((resolve) => {
+        setTimeout(() => resolve(), 10000);
+    })
+    console.log("BAR")
     const response = await makeRequestWithSideEffects(SIDE_EFFECT_REQUEST_COMMANDS.GET_TRANSACTIONS_PENDING_3DS_REVIEW, {transactionID}, {});
     return !!response?.transactionsPending3DSReview?.[transactionID];
 }
