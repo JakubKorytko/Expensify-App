@@ -82,7 +82,8 @@ function useNavigateTo3DSAuthorizationChallenge() {
             }
 
             // Make an API call to double check that the challenge is still valid
-            const challengeStillValid = await isTransactionStillPending3DSReview(transactionPending3DSReview.transactionID);
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+            const challengeStillValid = transactionPending3DSReview?.simulated || (await isTransactionStillPending3DSReview(transactionPending3DSReview.transactionID));
 
             // If we know that a challenge isn't valid anymore, better to bail out of navigating to the flow rather than showing the user the "already reviewed" outcome screen
             if (!challengeStillValid || cancel) {
@@ -98,7 +99,7 @@ function useNavigateTo3DSAuthorizationChallenge() {
         return () => {
             cancel = true;
         };
-    }, [transactionPending3DSReview?.transactionID, doesDeviceSupportBiometrics]);
+    }, [transactionPending3DSReview?.transactionID, doesDeviceSupportBiometrics, transactionPending3DSReview?.simulated]);
 }
 
 export default useNavigateTo3DSAuthorizationChallenge;

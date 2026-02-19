@@ -30,6 +30,9 @@ type TransactionPending3DSReview = {
 
     /** Added by client to mark that an approval/denial request is in-flight for this transaction */
     isLoading?: boolean;
+
+    /** Added by the troubleshooting tool to mark that this transaction is simulated */
+    simulated?: boolean;
 };
 
 export default TransactionPending3DSReview;

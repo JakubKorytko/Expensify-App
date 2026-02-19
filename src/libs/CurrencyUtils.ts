@@ -4,6 +4,7 @@ import IntlStore from '@src/languages/IntlStore';
 import type {OnyxValues} from '@src/ONYXKEYS';
 import ONYXKEYS from '@src/ONYXKEYS';
 import type {CurrencyList, Locale} from '@src/types/onyx';
+import {generateRandomInt} from './NumberUtils';
 import {format, formatToParts} from './NumberFormatUtils';
 
 let currencyList: OnyxValues[typeof ONYXKEYS.CURRENCY_LIST] = {};
@@ -214,6 +215,16 @@ function getCurrencyKeyByCountryCode(currencies?: CurrencyList, countryCode?: st
     return CONST.CURRENCY.USD;
 }
 
+/**
+ * Generate a random currency code from the currency list.
+ * This is used for testing purposes.
+ */
+function generateRandomCurrency() {
+    const codes = Object.keys(currencyList);
+    const index = generateRandomInt(0, codes.length - 1);
+    return codes.at(index) ?? CONST.CURRENCY.USD;
+}
+
 export {
     getCurrencyDecimals,
     getCurrencyUnit,
@@ -228,4 +239,5 @@ export {
     convertToDisplayStringWithoutCurrency,
     isValidCurrencyCode,
     convertToShortDisplayString,
+    generateRandomCurrency,
 };
