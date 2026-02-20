@@ -1,4 +1,5 @@
 export type {default as GetTransactionsForMergingParams} from './GetTransactionsForMergingParams';
+export type {default as GetTransactionsPending3DSReviewParams} from './GetTransactionsPending3DSReviewParams';
 export type {default as ImportCSVTransactionsParams} from './ImportCSVTransactionsParams';
 export type {default as ImportMultiLevelTagsParams} from './ImportMultiLevelTagsParams';
 export type {default as CleanPolicyTagsParams} from './CleanPolicyTagsParams';
@@ -485,3 +486,5 @@ export type {default as GetTransactionsMatchingCodingRuleParams} from './GetTran
 export type {default as SetPolicyTimeTrackingDefaultRateParams} from './SetPolicyTimeTrackingDefaultRateParams';
 export type {default as ToggleTwoFactorAuthRequiredForDomainParams} from './ToggleTwoFactorAuthRequiredForDomainParams';
 export type {default as DeleteVacationDelegateParams} from './DeleteVacationDelegateParams';
+export type {default as AuthorizeTransactionParams} from './AuthorizeTransactionParams';
+export type {default as DenyTransactionParams} from './DenyTransactionParams';

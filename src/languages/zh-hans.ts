@@ -634,6 +634,29 @@ const translations: TranslationDeepObject<typeof en> = {
         signIn: '请重新登录。',
     },
     multifactorAuthentication: {
+        reviewTransaction: {
+            reviewTransaction: '查看交易',
+            pleaseReview: '请审核此交易',
+            requiresYourReview: '需要您在下方审核一笔 Expensify Card 交易。',
+            transactionDetails: '交易详情',
+            deny: '拒绝',
+            approve: '批准',
+            denyTransaction: '拒绝交易',
+            transactionDenied: '交易被拒绝',
+            transactionApproved: '交易已批准！',
+            areYouSureToDeny: '您确定吗？如果关闭此界面，这笔交易将被拒绝。',
+            youCanTryAgainAtMerchantOrReachOut: '您可以在商家处重试。如果您没有发起此交易，请<concierge-link>联系 Concierge</concierge-link>报告潜在欺诈。',
+            youNeedToTryAgainAtMerchant: '此交易未通过验证，因此已被拒绝。请在商户处重新尝试。',
+            goBackToTheMerchant: '返回商家网站以继续完成交易。',
+            authorizationFailed: '您的授权失败，因此我们拒绝了这笔交易。您可以在商户处再试一次。',
+            attemptedTransaction: '已尝试的交易',
+            transactionFailed: '交易失败',
+            transactionCouldNotBeCompleted: '您的交易未能完成。请在商户处重试。',
+            transactionCouldNotBeCompletedReachOut: '您的交易无法完成。如果您未尝试进行此笔交易，请<concierge-link>联系 Concierge</concierge-link>报告潜在欺诈。',
+            reviewFailed: '审核失败',
+            alreadyReviewedSubtitle:
+                '您已审核过此交易。请查看您的<transaction-history-link>交易记录</transaction-history-link>，或联系<concierge-link>Concierge</concierge-link>报告任何问题。',
+        },
         biometricsTest: {
             biometricsTest: '生物识别测试',
             authenticationSuccessful: '验证成功',
@@ -7179,6 +7202,7 @@ ${reportName}
                 settlementAccountLocked: ({maskedBankAccountNumber}: OriginalMessageSettlementAccountLocked, linkURL: string) =>
                     `由于报销或 Expensify 卡结算问题，企业银行账户 ${maskedBankAccountNumber} 已被自动锁定。请在<a href="${linkURL}">工作区设置</a>中解决该问题。`,
                 leftTheChatWithName: (nameOrEmail: string) => `${nameOrEmail ? `${nameOrEmail}: ` : ''}离开了聊天`,
+                actionableCard3DSTransactionApproval: (amount: string, merchant: string) => `打开 Expensify 移动应用以查看你在 ${merchant} 的 ${amount} 交易`,
             },
             error: {
                 invalidCredentials: '凭证无效，请检查您的连接配置。',

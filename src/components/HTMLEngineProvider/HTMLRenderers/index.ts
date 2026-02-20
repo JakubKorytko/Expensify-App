@@ -3,6 +3,7 @@ import AccountManagerLinkRenderer from './AccountManagerLinkRenderer';
 import AnchorRenderer from './AnchorRenderer';
 import CodeRenderer from './CodeRenderer';
 import ConciergeLinkRenderer from './ConciergeLinkRenderer';
+import TransactionHistoryLinkRenderer from './TransactionHistoryLinkRenderer';
 import CopyTextRenderer from './CopyTextRenderer';
 import DeletedActionRenderer from './DeletedActionRenderer';
 import EditedRenderer from './EditedRenderer';
@@ -45,6 +46,7 @@ const HTMLEngineProviderComponentList: CustomTagRendererRecord = {
     'next-step-email': NextStepEmailRenderer,
     'deleted-action': DeletedActionRenderer,
     'concierge-link': ConciergeLinkRenderer,
+    'transaction-history-link': TransactionHistoryLinkRenderer,
     'account-manager-link': AccountManagerLinkRenderer,
     /* eslint-enable @typescript-eslint/naming-convention */
 };

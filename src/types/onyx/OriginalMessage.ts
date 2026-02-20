@@ -1,6 +1,7 @@
 import type {ValueOf} from 'type-fest';
 import type CONST from '@src/CONST';
 import type DeepValueOf from '@src/types/utils/DeepValueOf';
+import type TransactionPending3DSReview from './TransactionPending3DSReview';
 import type {PolicyRuleTaxRate} from './ExpenseRule';
 import type {Attendee} from './IOU';
 import type {OldDotOriginalMessageMap} from './OldDotAction';
@@ -1249,6 +1250,11 @@ type OriginalMessageTakeControl = {
 };
 
 /**
+ * Minimal transaction data needed to render the MFA authorize transaction preview.
+ */
+type OriginalMessageActionableCard3DSTransactionApproval = TransactionPending3DSReview;
+
+/**
  * Model of settlement account locked report action
  */
 type OriginalMessageSettlementAccountLocked = {
@@ -1295,6 +1301,7 @@ type OriginalMessageReimbursementDirectorInformationRequired = {
 /* eslint-disable jsdoc/require-jsdoc */
 type OriginalMessageMap = {
     [CONST.REPORT.ACTIONS.TYPE.ACTIONABLE_ADD_PAYMENT_CARD]: OriginalMessageAddPaymentCard;
+    [CONST.REPORT.ACTIONS.TYPE.ACTIONABLE_CARD_3DS_TRANSACTION_APPROVAL]: OriginalMessageActionableCard3DSTransactionApproval;
     [CONST.REPORT.ACTIONS.TYPE.ACTIONABLE_CARD_FRAUD_ALERT]: OriginalMessageCardFraudAlert;
     [CONST.REPORT.ACTIONS.TYPE.ACTIONABLE_JOIN_REQUEST]: OriginalMessageJoinPolicy;
     [CONST.REPORT.ACTIONS.TYPE.ACTIONABLE_MENTION_WHISPER]: OriginalMessageActionableMentionWhisper;

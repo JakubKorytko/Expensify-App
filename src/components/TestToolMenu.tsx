@@ -17,6 +17,7 @@ import CONFIG from '@src/CONFIG';
 import ONYXKEYS from '@src/ONYXKEYS';
 import ROUTES from '@src/ROUTES';
 import {hasBiometricsRegisteredSelector, isAccountLoadingSelector} from '@src/selectors/Account';
+import SimulatePendingTransaction from './MultifactorAuthentication/components/SimulatePendingTransaction';
 import Button from './Button';
 import SoftKillTestToolRow from './SoftKillTestToolRow';
 import Switch from './Switch';
@@ -34,6 +35,7 @@ function TestToolMenu() {
     const {clearLHNCache} = useSidebarOrderedReports();
     const [hasBiometricsRegistered = false] = useOnyx(ONYXKEYS.ACCOUNT, {canBeMissing: true, selector: hasBiometricsRegisteredSelector});
     const [isAccountLoading = false] = useOnyx(ONYXKEYS.ACCOUNT, {canBeMissing: true, selector: isAccountLoadingSelector});
+    const [showTest3DS, setShowTest3DS] = React.useState(false);
 
     const {singleExecution} = useSingleExecution();
     const waitForNavigate = useWaitForNavigation();
@@ -56,6 +58,10 @@ function TestToolMenu() {
 
     return (
         <>
+            <SimulatePendingTransaction
+                isVisible={showTest3DS}
+                onClose={() => setShowTest3DS(false)}
+            />
             <Text
                 style={[styles.textLabelSupporting, styles.mb4]}
                 numberOfLines={1}
@@ -106,6 +112,14 @@ function TestToolMenu() {
                             small
                             text={translate('initialSettingsPage.troubleshoot.clearleftHandNavCache')}
                             onPress={clearLHNCache}
+                        />
+                    </TestToolRow>
+
+                    <TestToolRow title="3D-Secure">
+                        <Button
+                            small
+                            text="Simulate transaction"
+                            onPress={() => setShowTest3DS(true)}
                         />
                     </TestToolRow>
 

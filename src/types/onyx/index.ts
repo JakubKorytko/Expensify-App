@@ -5,6 +5,8 @@ import type AccountData from './AccountData';
 import type AppReview from './AppReview';
 import type {ApprovalWorkflowOnyx} from './ApprovalWorkflow';
 import type {AssignCard, AssignCardData} from './AssignCard';
+import type TransactionPending3DSReview from './TransactionPending3DSReview';
+import type TransactionsPending3DSReview from './TransactionsPending3DSReview';
 import type {BankAccountList} from './BankAccount';
 import type BankAccount from './BankAccount';
 import type BankAccountShareDetails from './BankAccountShareDetails';
@@ -168,6 +170,7 @@ import type WalletOnfido from './WalletOnfido';
 import type WalletStatement from './WalletStatement';
 import type WalletTerms from './WalletTerms';
 import type WalletTransfer from './WalletTransfer';
+import type LocallyProcessed3DSChallengeReviews from './LocallyProcessed3DSChallengeReviews';
 
 export type {
     FileObject,
@@ -175,6 +178,8 @@ export type {
     Account,
     AccountData,
     AssignCard,
+    TransactionPending3DSReview,
+    TransactionsPending3DSReview,
     BankAccount,
     BankAccountList,
     Beta,
@@ -361,4 +366,5 @@ export type {
     CodingRuleMatchingTransaction,
     UserSecurityGroupData,
     DeviceBiometrics,
+    LocallyProcessed3DSChallengeReviews,
 };

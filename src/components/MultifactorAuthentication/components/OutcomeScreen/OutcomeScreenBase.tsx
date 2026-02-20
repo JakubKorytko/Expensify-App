@@ -6,6 +6,7 @@ import Button from '@components/Button';
 import HeaderWithBackButton from '@components/HeaderWithBackButton';
 import {loadIllustration} from '@components/Icon/IllustrationLoader';
 import type {IllustrationName} from '@components/Icon/IllustrationLoader';
+import RenderHTML from '@components/RenderHTML';
 import ScreenWrapper from '@components/ScreenWrapper';
 import {useMemoizedLazyAsset} from '@hooks/useLazyAsset';
 import useLocalize from '@hooks/useLocalize';
@@ -28,6 +29,14 @@ function OutcomeScreenBase({headerTitle, illustration, iconWidth, iconHeight, ti
     const styles = useThemeStyles();
     const {asset: icon} = useMemoizedLazyAsset(() => loadIllustration(illustration));
 
+    const renderedSubtitle =
+        customSubtitle ??
+        (subtitle ? (
+            <View style={[styles.renderHTML, styles.flexRow, styles.w100, styles.ph5]}>
+                <RenderHTML html={`<centered-text><muted-text>${subtitle}</muted-text></centered-text>`} />
+            </View>
+        ) : undefined);
+
     const onClose = () => {
         Navigation.closeRHPFlow();
     };
@@ -47,9 +56,8 @@ function OutcomeScreenBase({headerTitle, illustration, iconWidth, iconHeight, ti
                     iconHeight={iconHeight}
                     title={title}
                     titleStyles={styles.mb2}
-                    subtitle={subtitle}
-                    CustomSubtitle={customSubtitle}
-                    subtitleStyle={styles.textSupporting}
+                    CustomSubtitle={renderedSubtitle}
+                    subtitleStyle={[styles.textSupporting, styles.ph5]}
                     containerStyle={[styles.ph5, padding]}
                     testID={OutcomeScreenBase.displayName}
                 />

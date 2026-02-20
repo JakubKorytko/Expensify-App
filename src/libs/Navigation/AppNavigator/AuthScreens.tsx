@@ -66,6 +66,7 @@ import ONYXKEYS from '@src/ONYXKEYS';
 import ROUTES from '@src/ROUTES';
 import SCREENS from '@src/SCREENS';
 import type ReactComponentModule from '@src/types/utils/ReactComponentModule';
+import useNavigateTo3DSAuthorizationChallenge from '@libs/Navigation/useNavigateTo3DSAuthorizationChallenge';
 import attachmentModalScreenOptions from './attachmentModalScreenOptions';
 import createRootStackNavigator from './createRootStackNavigator';
 import {screensWithEnteringAnimation, workspaceOrDomainSplitsWithoutEnteringAnimation} from './createRootStackNavigator/GetStateForActionHandlers';
@@ -187,6 +188,8 @@ function AuthScreens() {
     const isLoadingAppRef = useRef(isLoadingApp);
     lastUpdateIDAppliedToClientRef.current = lastUpdateIDAppliedToClient;
     isLoadingAppRef.current = isLoadingApp;
+
+    useNavigateTo3DSAuthorizationChallenge();
 
     const handleNetworkReconnect = () => {
         if (isLoadingAppRef.current) {
